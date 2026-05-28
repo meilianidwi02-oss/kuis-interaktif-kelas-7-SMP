@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Ular Tangga — Fiksi & Nonfiksi Kelas 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f0c29;--card:#1a1640;--purple:#8b5cf6;--pink:#ec4899;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--blue:#38bdf8;--text:#f1f5f9;--text2:#94a3b8}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(109,40,217,0.25) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(236,72,153,0.2) 0%,transparent 55%);pointer-events:none;z-index:0}
+.screen{display:none;position:relative;z-index:1;min-height:100vh;padding:20px;flex-direction:column;align-items:center;justify-content:center}
+.screen.active{display:flex}
+
+/* INTRO */
+#screen-intro{text-align:center;gap:16px}
+.intro-badge{display:inline-block;background:linear-gradient(135deg,var(--purple),var(--pink));font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:6px 18px;border-radius:999px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)}50%{box-shadow:0 0 0 10px rgba(139,92,246,0)}}
+.intro-title{font-family:'Fredoka One',cursive;font-size:clamp(34px,8vw,64px);line-height:1.05;background:linear-gradient(135deg,#c4b5fd,#f9a8d4,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.intro-sub{font-size:15px;color:var(--text2);font-weight:700}
+.intro-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text2)}
+.chip span{color:var(--text)}
+.btn-main{padding:14px 36px;font-family:'Fredoka One',cursive;font-size:19px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;box-shadow:0 0 24px rgba(139,92,246,0.5);transition:transform 0.15s}
+.btn-main:hover{transform:scale(1.05)}
+.btn-main:active{transform:scale(0.97)}
+.btn-main:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+
+/* ROLE SELECT */
+#screen-role{gap:18px;text-align:center}
+.role-title{font-family:'Fredoka One',cursive;font-size:28px;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.role-cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.role-card{background:var(--card);border:2px solid rgba(255,255,255,0.1);border-radius:18px;padding:20px 24px;cursor:pointer;transition:all 0.2s;text-align:center;min-width:150px}
+.role-card:hover{border-color:var(--purple);background:rgba(139,92,246,0.15);transform:translateY(-3px)}
+.role-icon{font-size:40px;margin-bottom:8px}
+.role-name{font-family:'Fredoka One',cursive;font-size:18px;color:var(--text)}
+.role-desc{font-size:12px;color:var(--text2);font-weight:600;margin-top:4px}
+
+/* SETUP GURU */
+#screen-setup{gap:18px;padding:30px 20px}
+.setup-title{font-family:'Fredoka One',cursive;font-size:28px;text-align:center;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.count-row{display:flex;align-items:center;gap:12px;justify-content:center}
+.cnt-btn{width:40px;height:40px;border-radius:50%;border:2px solid var(--purple);background:transparent;color:var(--purple);font-size:20px;font-weight:800;cursor:pointer;transition:all 0.15s}
+.cnt-btn:hover{background:var(--purple);color:white}
+#cnt-num{font-family:'Fredoka One',cursive;font-size:36px;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:50px;text-align:center}
+#pform{width:100%;max-width:440px;display:flex;flex-direction:column;gap:9px}
+.pinput-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;transition:border-color 0.2s}
+.pinput-row:focus-within{border-color:var(--purple)}
+.pavatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.pinput-row input{flex:1;background:transparent;border:none;outline:none;font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.pinput-row input::placeholder{color:rgba(148,163,184,0.4)}
+.btn-sec{padding:9px 22px;font-family:'Fredoka One',cursive;font-size:15px;border-radius:12px;cursor:pointer;border:2px solid var(--purple);background:transparent;color:var(--purple);transition:all 0.2s}
+.btn-sec:hover{background:var(--purple);color:white}
+
+/* JOIN SISWA */
+#screen-join{gap:16px;text-align:center}
+.join-title{font-family:'Fredoka One',cursive;font-size:26px;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.join-input{width:100%;max-width:340px;padding:14px 18px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text);outline:none;text-align:center}
+.join-input:focus{border-color:var(--purple)}
+.kelompok-list{width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px}
+.kelompok-btn{padding:12px 16px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;border-radius:14px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px}
+.kelompok-btn:hover{border-color:var(--purple);background:rgba(139,92,246,0.15)}
+.kelompok-btn.joined{border-color:var(--green);background:rgba(34,197,94,0.12);color:#86efac}
+.kelompok-btn:disabled{opacity:0.4;cursor:not-allowed}
+#join-status{font-size:13px;font-weight:700;color:var(--text2);text-align:center}
+
+/* WAITING */
+#screen-waiting{gap:16px;text-align:center}
+.wait-title{font-family:'Fredoka One',cursive;font-size:26px;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.wait-spinner{font-size:48px;animation:spin 2s linear infinite}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.joined-list{width:100%;max-width:360px;display:flex;flex-direction:column;gap:7px}
+.joined-item{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px}
+.joined-dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* GAME */
+#screen-game{justify-content:flex-start;align-items:stretch;padding:10px 12px;gap:10px;flex-direction:column}
+.g-header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.g-logo{font-family:'Fredoka One',cursive;font-size:17px;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.turn-pill{background:linear-gradient(135deg,var(--purple),var(--pink));padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;animation:blink 1.5s infinite;margin-right:5px}
+.g-body{display:grid;grid-template-columns:1fr 185px;gap:10px;flex:1}
+@media(max-width:580px){.g-body{grid-template-columns:1fr}}
+#board{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.06);background:var(--card);position:relative;transition:transform 0.2s;overflow:visible}
+.cell-num{font-size:8px;font-weight:900;color:var(--text2);position:absolute;top:2px;left:3px;line-height:1}
+.cell-icon{font-size:13px;line-height:1}
+.cell.snake{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4)}
+.cell.ladder{background:rgba(34,197,94,0.15);border-color:rgba(34,197,94,0.4)}
+.cell.q-fill{background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5)}
+.cell.q-challenge{background:rgba(245,158,11,0.2);border-color:rgba(245,158,11,0.5)}
+.cell.finish{background:linear-gradient(135deg,rgba(245,158,11,0.3),rgba(251,191,36,0.2));border-color:var(--amber);box-shadow:0 0 12px rgba(245,158,11,0.3)}
+.cell.glow{box-shadow:0 0 0 3px var(--amber),0 0 16px rgba(245,158,11,0.5);transform:scale(1.08);z-index:5}
+.pieces{display:flex;gap:1px;flex-wrap:wrap;justify-content:center;position:absolute;bottom:2px}
+.piece{width:9px;height:9px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.6);box-shadow:0 0 4px rgba(0,0,0,0.4)}
+.sidebar{display:flex;flex-direction:column;gap:8px}
+.scard{background:var(--card);border:1.5px solid rgba(255,255,255,0.07);border-radius:13px;padding:10px 12px}
+.scard h4{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:7px}
+.pitem{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.pitem:last-child{border-bottom:none}
+.pav{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.pname{font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pkotak{font-size:10px;color:var(--text2);font-weight:600}
+.pscore{font-size:10px;font-weight:800;padding:2px 6px;border-radius:999px;background:rgba(139,92,246,0.2);color:#c4b5fd;white-space:nowrap}
+.dice-card{text-align:center}
+#dice-face{font-size:40px;margin:3px 0 7px}
+#dice-face.roll{animation:droll 0.5s ease}
+@keyframes droll{0%{transform:rotate(0)scale(1)}30%{transform:rotate(-20deg)scale(1.2)}70%{transform:rotate(15deg)scale(1.2)}100%{transform:rotate(0)scale(1)}}
+#roll-btn{width:100%;padding:9px;font-family:'Fredoka One',cursive;font-size:15px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;transition:transform 0.15s,opacity 0.15s}
+#roll-btn:hover:not(:disabled){transform:scale(1.04)}
+#roll-btn:disabled{opacity:0.4;cursor:not-allowed}
+#roll-msg{font-size:11px;font-weight:700;color:var(--text2);margin-top:6px;min-height:26px;line-height:1.4;text-align:center}
+.leg-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+.observer-badge{background:rgba(56,189,248,0.15);border:1px solid rgba(56,189,248,0.3);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:800;color:#7dd3fc;text-align:center}
+
+/* SOAL */
+#screen-question{justify-content:stretch;align-items:stretch;padding:0}
+.qscreen-wrap{display:flex;flex-direction:column;min-height:100vh;width:100%}
+.q-top{padding:14px 18px 10px;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(236,72,153,0.2));border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.q-who{padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800}
+.q-type-badge{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800}
+.type-fill{background:rgba(56,189,248,0.2);color:#7dd3fc;border:1px solid rgba(56,189,248,0.3)}
+.type-challenge{background:rgba(245,158,11,0.2);color:#fcd34d;border:1px solid rgba(245,158,11,0.3)}
+#q-timer-wrap{width:100%;height:5px;background:rgba(255,255,255,0.08)}
+#q-timer-bar{height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--amber),var(--red));transition:width 0.1s linear}
+#q-timer-num{font-family:'Fredoka One',cursive;font-size:19px;min-width:42px;text-align:center}
+.q-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:14px;max-width:660px;margin:0 auto;width:100%}
+.q-num{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2)}
+.q-text{font-family:'Fredoka One',cursive;font-size:clamp(16px,3.5vw,25px);line-height:1.45;color:var(--text);text-align:center;animation:qin 0.35s ease}
+@keyframes qin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fill-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
+.fill-hint{font-size:13px;color:var(--text2);font-weight:600}
+.fill-input{width:100%;max-width:400px;padding:13px 16px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text);outline:none;text-align:center;transition:border-color 0.2s}
+.fill-input:focus{border-color:var(--blue)}
+.fill-input.correct{border-color:var(--green);background:rgba(34,197,94,0.1)}
+.fill-input.wrong{border-color:var(--red);background:rgba(239,68,68,0.1)}
+.btn-jawab{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:16px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;transition:transform 0.15s}
+.btn-jawab:hover{transform:scale(1.04)}
+.btn-jawab:disabled{opacity:0.4;cursor:not-allowed}
+.challenge-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
+.challenge-desc{font-size:14px;color:var(--text2);font-weight:600;text-align:center;line-height:1.5}
+.challenge-inputs{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px}
+.challenge-input{padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;border-radius:12px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text);outline:none;transition:border-color 0.2s}
+.challenge-input:focus{border-color:var(--amber)}
+.challenge-note{font-size:11px;color:var(--text2);font-weight:600;text-align:center}
+.q-feedback{font-family:'Fredoka One',cursive;font-size:20px;min-height:28px;text-align:center}
+.q-feedback.ok{color:var(--green);animation:pop 0.4s ease}
+.q-feedback.no{color:var(--red);animation:pop 0.4s ease}
+@keyframes pop{0%{transform:scale(0.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+.q-explain{font-size:13px;font-weight:600;color:var(--text2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;max-width:500px;display:none;text-align:center;line-height:1.6}
+#btn-next{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:17px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;display:none;animation:qin 0.3s ease}
+#btn-next:hover{transform:scale(1.04)}
+.observer-q-msg{text-align:center;padding:16px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:14px;color:#7dd3fc;font-size:14px;font-weight:700;max-width:400px}
+
+/* FINISH */
+#screen-finish{text-align:center;gap:18px;background:radial-gradient(ellipse at center,rgba(139,92,246,0.3) 0%,transparent 70%),var(--bg)}
+.fin-title{font-family:'Fredoka One',cursive;font-size:clamp(28px,7vw,54px);background:linear-gradient(135deg,#fde68a,#f9a8d4,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3s ease-in-out infinite}
+.podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.podium-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:86px}
+.pod-av{font-size:28px}
+.pod-name{font-size:12px;font-weight:800;max-width:86px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod-score{font-size:11px;color:var(--text2);font-weight:700}
+.pod-block{width:74px;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;font-family:'Fredoka One',cursive;font-size:22px;padding:10px 0}
+.pb1{background:linear-gradient(180deg,#fde68a,#f59e0b);height:100px;box-shadow:0 0 20px rgba(245,158,11,0.4)}
+.pb2{background:linear-gradient(180deg,#e2e8f0,#94a3b8);height:72px}
+.pb3{background:linear-gradient(180deg,#fcd9b6,#d97706);height:54px}
+.score-tbl{background:var(--card);border:1.5px solid rgba(255,255,255,0.08);border-radius:16px;width:100%;max-width:390px;overflow:hidden}
+.strow{display:grid;grid-template-columns:32px 1fr 52px 52px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.05);font-size:13px;font-weight:700;align-items:center;gap:6px}
+.strow:last-child{border-bottom:none}
+.strow.hdr{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);background:rgba(255,255,255,0.03)}
+.rnum{font-family:'Fredoka One',cursive;font-size:17px;text-align:center}
+.r1{color:var(--amber)}.r2{color:#94a3b8}.r3{color:#cd7f32}
+.confetti-p{position:fixed;width:9px;height:9px;animation:cfall linear forwards;pointer-events:none;z-index:999;border-radius:2px}
+@keyframes cfall{0%{transform:translateY(-20px)rotate(0);opacity:1}100%{transform:translateY(110vh)rotate(720deg);opacity:0}}
+
+/* LOADING */
+#loading-overlay{position:fixed;inset:0;background:rgba(15,12,41,0.95);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#loading-overlay.hide{display:none}
+.loading-spin{font-size:48px;animation:spin 1.5s linear infinite}
+.loading-text{font-family:'Fredoka One',cursive;font-size:20px;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="loading-spin">🎲</div>
+  <div class="loading-text">Menghubungkan...</div>
+</div>
+
+<!-- INTRO -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-badge">🎮 Game Edukasi Kelas 7</div>
+  <div style="font-size:48px;display:flex;gap:12px;justify-content:center">🎲📚🐍🪜</div>
+  <h1 class="intro-title">Kuis Ular Tangga</h1>
+  <p class="intro-sub">Buku Fiksi &amp; Nonfiksi — Bahasa Indonesia</p>
+  <div class="intro-chips">
+    <div class="chip"><span>📝</span> 40 soal variatif</div>
+    <div class="chip"><span>🔄</span> Realtime sync</div>
+    <div class="chip"><span>👥</span> 2–5 kelompok</div>
+    <div class="chip"><span>⏱️</span> Timer per soal</div>
+  </div>
+  <button class="btn-main" onclick="goTo('screen-role')">Mulai Game! 🚀</button>
+</div>
+
+<!-- PILIH PERAN -->
+<div class="screen" id="screen-role">
+  <div class="role-title">Kamu sebagai siapa?</div>
+  <p style="color:var(--text2);font-size:13px;font-weight:600">Guru yang mengatur game, atau siswa yang ikut main?</p>
+  <div class="role-cards">
+    <div class="role-card" onclick="selectRole('guru')">
+      <div class="role-icon">👩‍🏫</div>
+      <div class="role-name">Guru</div>
+      <div class="role-desc">Setup &amp; kendali game</div>
+    </div>
+    <div class="role-card" onclick="selectRole('siswa')">
+      <div class="role-icon">🎒</div>
+      <div class="role-name">Siswa</div>
+      <div class="role-desc">Gabung &amp; main bareng</div>
+    </div>
+  </div>
+  <button class="btn-sec" onclick="goTo('screen-intro')">← Kembali</button>
+</div>
+
+<!-- SETUP GURU -->
+<div class="screen" id="screen-setup">
+  <h2 class="setup-title">Setup Kelompok</h2>
+  <p style="color:var(--text2);font-size:13px;font-weight:600;text-align:center">Masukkan nama tiap kelompok (2–5)</p>
+  <div class="count-row">
+    <button class="cnt-btn" onclick="changeCount(-1)">−</button>
+    <div id="cnt-num">3</div>
+    <button class="cnt-btn" onclick="changeCount(1)">+</button>
+  </div>
+  <div id="pform"></div>
+  <button class="btn-main" id="btn-start-game" onclick="startGameAsGuru()">Mulai &amp; Bagikan! 🎯</button>
+  <button class="btn-sec" onclick="goTo('screen-role')">← Kembali</button>
+</div>
+
+<!-- JOIN SISWA -->
+<div class="screen" id="screen-join">
+  <div class="join-title">Gabung Game</div>
+  <p style="color:var(--text2);font-size:13px;font-weight:600">Pilih kelompokmu</p>
+  <div id="join-status">Menghubungkan ke server...</div>
+  <div class="kelompok-list" id="kelompok-list"></div>
+  <button class="btn-sec" onclick="goTo('screen-role')">← Kembali</button>
+</div>
+
+<!-- WAITING -->
+<div class="screen" id="screen-waiting">
+  <div class="wait-title" id="wait-title">Menunggu game dimulai...</div>
+  <div class="wait-spinner">⏳</div>
+  <p style="color:var(--text2);font-size:13px;font-weight:700" id="wait-sub">Guru belum memulai game</p>
+  <div class="joined-list" id="joined-list"></div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="screen-game">
+  <div class="g-header">
+    <div class="g-logo">🎲 Ular Tangga</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-dot"></span>
+      <div class="turn-pill" id="turn-pill">Giliran: —</div>
+    </div>
+  </div>
+  <div id="observer-info" style="display:none"></div>
+  <div class="g-body">
+    <div>
+      <div id="board"></div>
+      <div class="leg-row">
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(239,68,68,0.5);border:1px solid #ef4444"></div>Ular</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(34,197,94,0.5);border:1px solid #22c55e"></div>Tangga</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(139,92,246,0.5);border:1px solid #8b5cf6"></div>✍️Isian</div>
+        <div class="leg-item"><div class="leg-dot" style="background:rgba(245,158,11,0.5);border:1px solid #f59e0b"></div>⚡Tantangan</div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="scard"><h4>Kelompok</h4><div id="plist"></div></div>
+      <div class="scard dice-card">
+        <h4>Dadu</h4>
+        <div id="dice-face">🎲</div>
+        <button id="roll-btn" onclick="rollDice()" disabled>Lempar!</button>
+        <div id="roll-msg">Menunggu...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOAL -->
+<div class="screen" id="screen-question" style="justify-content:stretch;align-items:stretch;padding:0">
+  <div class="qscreen-wrap">
+    <div class="q-top">
+      <div class="q-who" id="q-who">Kelompok</div>
+      <div id="q-timer-num" style="font-family:'Fredoka One',cursive;font-size:19px">⏱ 20</div>
+      <div class="q-type-badge" id="q-type-badge">Isian</div>
+    </div>
+    <div id="q-timer-wrap"><div id="q-timer-bar"></div></div>
+    <div class="q-body">
+      <div class="q-num" id="q-num">Soal</div>
+      <div class="q-text" id="q-text"></div>
+      <div id="q-input-area"></div>
+      <div class="q-feedback" id="q-feedback"></div>
+      <div class="q-explain" id="q-explain"></div>
+      <button id="btn-next" onclick="closeQ()">Lanjut ke Papan ➜</button>
+    </div>
+  </div>
+</div>
+
+<!-- FINISH -->
+<div class="screen" id="screen-finish">
+  <div style="font-size:52px;animation:float 2s infinite">🏆</div>
+  <h1 class="fin-title" id="fin-title">Selamat!</h1>
+  <p style="color:var(--text2);font-weight:700;font-size:14px" id="fin-sub"></p>
+  <div class="podium-wrap" id="podium"></div>
+  <div class="score-tbl">
+    <div class="strow hdr"><div>#</div><div>Kelompok</div><div style="text-align:center">Benar</div><div style="text-align:center">Kotak</div></div>
+    <div id="fin-scores"></div>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <button class="btn-main" onclick="resetGame()">Main Lagi 🔄</button>
+  </div>
+</div>
+
+<script>
+// ===== FIREBASE =====
+const firebaseConfig = {
+  apiKey: "AIzaSyDummy-not-needed-for-rtdb-only",
+  databaseURL: "https://kuis-interaktif-kelas-7-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const gameRef = db.ref('game');
+
+// ===== CONSTANTS =====
+const SNAKES  = {35:14,31:6,27:10,22:3,18:7};
+const LADDERS = {4:20,9:26,16:30,24:33};
+const TOTAL   = 36;
+const AVATARS = ['🦁','🐯','🐻','🦊','🐼'];
+const COLORS  = ['#8b5cf6','#ec4899','#38bdf8','#22c55e','#f59e0b'];
+const DICE_F  = ['','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣'];
+
+const QUESTIONS = [
+  {type:'fill',q:'Buku yang isinya berdasarkan imajinasi pengarang disebut buku ___',ans:['fiksi'],hint:'Lawan kata dari nonfiksi',kat:'Konsep Dasar'},
+  {type:'fill',q:'Buku yang berisi fakta dan informasi nyata disebut buku ___',ans:['nonfiksi','non fiksi','non-fiksi'],hint:'Buku pelajaran termasuk jenis ini',kat:'Konsep Dasar'},
+  {type:'fill',q:'Kisah hidup seseorang yang ditulis oleh orang lain disebut ___',ans:['biografi'],hint:'Bio = hidup, grafi = tulisan',kat:'Jenis Nonfiksi'},
+  {type:'fill',q:'Kisah hidup yang ditulis oleh dirinya sendiri disebut ___',ans:['autobiografi','otobiografi'],hint:'Auto = sendiri',kat:'Jenis Nonfiksi'},
+  {type:'fill',q:'Buku kumpulan cerita pendek dari beberapa pengarang disebut ___',ans:['antologi'],hint:'Berasal dari bahasa Yunani',kat:'Jenis Fiksi'},
+  {type:'fill',q:'Pesan moral yang ingin disampaikan pengarang dalam cerita fiksi disebut ___',ans:['amanat'],hint:'Biasanya ada di akhir cerita',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Urutan kejadian dalam cerita fiksi disebut ___',ans:['alur','plot'],hint:'Ada alur maju, mundur, dan campuran',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Daftar makna kata khusus di bagian belakang buku disebut ___',ans:['glosarium'],hint:'Biasanya ada di buku pelajaran',kat:'Struktur Buku'},
+  {type:'fill',q:'Gambaran tempat, waktu, dan suasana dalam cerita disebut ___',ans:['latar','setting'],hint:'Ada latar tempat, waktu, suasana',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Cara pengarang menggambarkan watak tokoh disebut ___',ans:['penokohan'],hint:'Ada teknik langsung dan tidak langsung',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Gagasan utama sebuah cerita fiksi disebut ___',ans:['tema'],hint:'Contoh: persahabatan, keberanian',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Tokoh yang memiliki watak jahat dalam cerita disebut tokoh ___',ans:['antagonis'],hint:'Lawan kata protagonis',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Tokoh utama yang bersifat baik dalam cerita disebut tokoh ___',ans:['protagonis'],hint:'Biasanya tokoh yang kita dukung',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Catatan pengalaman pribadi penulis dalam buku nonfiksi disebut ___',ans:['memoar'],hint:'Berasal dari kata memory',kat:'Jenis Nonfiksi'},
+  {type:'fill',q:'Buku referensi yang memuat pengetahuan dari berbagai bidang disebut ___',ans:['ensiklopedia'],hint:'Biasanya terdiri dari beberapa jilid',kat:'Jenis Nonfiksi'},
+  {type:'fill',q:'Bagian awal buku yang menjelaskan maksud penulisan disebut kata ___',ans:['pengantar','prakata'],hint:'Ada di halaman paling awal buku',kat:'Struktur Buku'},
+  {type:'fill',q:'Daftar topik dan halaman di akhir buku untuk memudahkan pencarian disebut ___',ans:['indeks'],hint:'Disusun berdasarkan abjad',kat:'Struktur Buku'},
+  {type:'fill',q:'Cerita yang menampilkan tokoh hewan berperilaku seperti manusia disebut ___',ans:['fabel'],hint:'Contoh: kancil dan buaya',kat:'Jenis Fiksi'},
+  {type:'fill',q:'Cerita rakyat yang menjelaskan asal usul suatu tempat disebut ___',ans:['legenda'],hint:'Contoh: legenda danau toba',kat:'Jenis Fiksi'},
+  {type:'fill',q:'Cerita yang mengandung unsur di luar logika dan kenyataan disebut cerita ___',ans:['fantasi'],hint:'Contoh: Harry Potter',kat:'Jenis Fiksi'},
+  {type:'fill',q:'Sudut pandang orang pertama dalam cerita menggunakan kata ganti ___',ans:['aku','saya'],hint:'Tokoh bercerita tentang dirinya sendiri',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Pertentangan yang menggerakkan alur cerita disebut ___',ans:['konflik'],hint:'Bisa konflik batin atau antar tokoh',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Bagian akhir cerita yang berisi penyelesaian masalah disebut ___',ans:['resolusi','penyelesaian'],hint:'Setelah klimaks cerita',kat:'Unsur Intrinsik'},
+  {type:'fill',q:'Buku berisi catatan perjalanan nyata yang dialami penulis disebut buku ___',ans:['perjalanan','catatan perjalanan'],hint:'Sering berisi foto destinasi wisata',kat:'Jenis Nonfiksi'},
+  {type:'fill',q:'Puncak ketegangan dalam alur cerita disebut ___',ans:['klimaks'],hint:'Setelah ini biasanya ada penyelesaian',kat:'Unsur Intrinsik'},
+  {type:'challenge',q:'Sebutkan 3 contoh buku FIKSI yang kamu ketahui!',desc:'Tuliskan judul atau jenis buku fiksi',expect:3,kat:'Buku Fiksi',contoh:'Laskar Pelangi, Cinderella, Malin Kundang'},
+  {type:'challenge',q:'Sebutkan 3 contoh buku NONFIKSI yang kamu ketahui!',desc:'Bisa berupa judul buku atau jenis buku nonfiksi',expect:3,kat:'Buku Nonfiksi',contoh:'Ensiklopedia, Biografi Soekarno, Kamus Bahasa Indonesia'},
+  {type:'challenge',q:'Sebutkan 3 unsur INTRINSIK dalam buku fiksi!',desc:'Tuliskan nama unsur intrinsiknya',expect:3,kat:'Unsur Intrinsik',contoh:'Tema, alur, tokoh, latar, amanat, sudut pandang'},
+  {type:'challenge',q:'Jelaskan perbedaan FIKSI dan NONFIKSI dengan kalimatmu sendiri!',desc:'Tuliskan penjelasanmu di bawah ini',expect:1,kat:'Perbedaan',contoh:'Fiksi berisi cerita rekaan, nonfiksi berisi fakta nyata'},
+  {type:'challenge',q:'Sebutkan 3 jenis cerita fiksi yang kamu tahu!',desc:'Contoh: novel, cerpen... apa lagi?',expect:3,kat:'Jenis Fiksi',contoh:'Novel, cerpen, dongeng, fabel, legenda, mite, komik'},
+  {type:'challenge',q:'Sebutkan 3 ciri-ciri buku NONFIKSI!',desc:'Tuliskan ciri-cirinya satu per satu',expect:3,kat:'Buku Nonfiksi',contoh:'Berisi fakta nyata, dapat diverifikasi, menggunakan bahasa formal'},
+  {type:'challenge',q:'Sebutkan 3 jenis buku nonfiksi beserta contohnya!',desc:'Format: jenis — contoh',expect:3,kat:'Jenis Nonfiksi',contoh:'Biografi — Biografi Soekarno, Ensiklopedia — Ensiklopedia Indonesia'},
+  {type:'challenge',q:'Sebutkan 3 bagian/struktur yang biasa ada dalam sebuah buku!',desc:'Bagian dari depan sampai belakang buku',expect:3,kat:'Struktur Buku',contoh:'Cover, daftar isi, kata pengantar, isi/bab, glosarium, indeks'},
+  {type:'challenge',q:'Sebutkan 3 manfaat membaca buku nonfiksi!',desc:'Tuliskan manfaatnya',expect:3,kat:'Manfaat Membaca',contoh:'Menambah pengetahuan, memperluas wawasan, meningkatkan kosa kata'},
+  {type:'challenge',q:'Sebutkan 3 manfaat membaca buku fiksi!',desc:'Tuliskan alasannya',expect:3,kat:'Manfaat Membaca',contoh:'Melatih imajinasi, menambah kosakata, mengembangkan empati'},
+  {type:'challenge',q:'Sebutkan 3 hal yang membedakan novel dan cerpen!',desc:'Tuliskan perbedaannya',expect:3,kat:'Jenis Fiksi',contoh:'Novel lebih panjang, cerpen lebih singkat. Novel banyak tokoh, cerpen sedikit tokoh'},
+  {type:'challenge',q:'Sebutkan 3 unsur EKSTRINSIK yang mempengaruhi buku fiksi!',desc:'Faktor di luar cerita yang mempengaruhi penulisan',expect:3,kat:'Unsur Ekstrinsik',contoh:'Latar belakang pengarang, kondisi sosial budaya, nilai moral masyarakat'},
+  {type:'challenge',q:'Ceritakan isi sebuah buku fiksi yang pernah kamu baca dalam 2-3 kalimat!',desc:'Sebutkan judulnya dulu, lalu ringkas ceritanya',expect:1,kat:'Apresiasi Sastra',contoh:'Laskar Pelangi: Kisah 10 anak dari keluarga miskin di Belitung yang berjuang sekolah...'},
+  {type:'challenge',q:'Sebutkan 3 pertanyaan yang bisa kamu buat setelah membaca buku nonfiksi!',desc:'Gunakan kata tanya 5W+1H',expect:3,kat:'Membaca Kritis',contoh:'Apa tujuan penulis? Siapa tokoh yang dibahas? Kapan peristiwa terjadi?'},
+  {type:'challenge',q:'Sebutkan 3 cara membedakan buku fiksi dan nonfiksi hanya dari melihat sampulnya!',desc:'Ciri-ciri yang bisa dilihat dari luar',expect:3,kat:'Perbedaan',contoh:'Genre di sampul, nama penulis fiksi vs akademisi, ilustrasi vs foto nyata'}
+];
+
+// ===== STATE =====
+let myRole = null; // 'guru' atau 'siswa'
+let questionAnswered = false;
+let myKelompokIdx = null;
+let gameState = null;
+let timerInt = null;
+let usedQ = new Set();
+let qCells_fill = [], qCells_challenge = [];
+let pendingCell = 0;
+let playerCount = 3;
+
+// ===== INIT =====
+// Hide loading overlay after Firebase connects (or timeout 3s)
+{
+  const overlay = document.getElementById('loading-overlay');
+  const hideOverlay = ()=> overlay.classList.add('hide');
+  // Try to read once to confirm connection
+  const connRef = db.ref('.info/connected');
+  let hidden = false;
+  connRef.on('value', snap => {
+    if(!hidden){ hidden=true; hideOverlay(); }
+  });
+  // Fallback: hide after 3 seconds regardless
+  setTimeout(()=>{ if(!hidden){ hidden=true; hideOverlay(); } }, 3000);
+}
+
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function selectRole(role){
+  myRole = role;
+  if(role==='guru') { goTo('screen-setup'); renderForm(); }
+  else { goTo('screen-join'); listenForPlayers(); }
+}
+
+// ===== GURU SETUP =====
+function changeCount(d){ playerCount=Math.max(2,Math.min(5,playerCount+d)); document.getElementById('cnt-num').textContent=playerCount; renderForm(); }
+function renderForm(){
+  const f=document.getElementById('pform'); f.innerHTML='';
+  for(let i=0;i<playerCount;i++){
+    const r=document.createElement('div'); r.className='pinput-row';
+    r.innerHTML=`<div class="pavatar" style="background:${COLORS[i]}22">${AVATARS[i]}</div><input id="pn-${i}" type="text" placeholder="Nama Kelompok ${i+1}">`;
+    f.appendChild(r);
+  }
+}
+
+function startGameAsGuru(){
+  const players = [];
+  const allQ=[5,8,12,15,17,19,21,25,28,32,34];
+  qCells_fill=[]; qCells_challenge=[];
+  allQ.forEach((c,i)=>i%2===0?qCells_fill.push(c):qCells_challenge.push(c));
+  for(let i=0;i<playerCount;i++){
+    const n=document.getElementById('pn-'+i)?.value.trim()||`Kelompok ${i+1}`;
+    players.push({name:n,color:COLORS[i],avatar:AVATARS[i],pos:0,benar:0,salah:0});
+  }
+  const initState = {
+    status:'playing',
+    players,
+    currentPlayer:0,
+    gameOver:false,
+    qCells_fill,
+    qCells_challenge,
+    usedQ:[],
+    diceResult:0,
+    rollMsg:'Klik lempar dadu',
+    question:null,
+    pendingCell:0,
+    ts: Date.now()
+  };
+  gameRef.set(initState).then(()=>{
+    myKelompokIdx = -1; // guru = observer
+    listenGameState();
+    goTo('screen-game');
+  });
+}
+
+// ===== SISWA JOIN =====
+function listenForPlayers(){
+  document.getElementById('join-status').textContent='Menunggu guru membuka game...';
+  gameRef.on('value', snap=>{
+    const gs = snap.val();
+    if(!gs || !gs.players){ document.getElementById('join-status').textContent='Game belum dimulai. Tunggu guru ya!'; document.getElementById('kelompok-list').innerHTML=''; return; }
+    document.getElementById('join-status').textContent='Pilih kelompokmu:';
+    const list=document.getElementById('kelompok-list'); list.innerHTML='';
+    gs.players.forEach((p,i)=>{
+      const btn=document.createElement('button'); btn.className='kelompok-btn';
+      btn.innerHTML=`<span style="font-size:20px">${p.avatar}</span><span style="flex:1">${p.name}</span><span style="font-size:12px;color:var(--text2)">Kotak ${p.pos}</span>`;
+      btn.onclick=()=>joinAsKelompok(i,gs);
+      list.appendChild(btn);
+    });
+  });
+}
+
+function joinAsKelompok(idx, gs){
+  myKelompokIdx = idx;
+  gameRef.off();
+  listenGameState();
+  const p = gs.players[idx];
+  document.getElementById('wait-title').textContent=`Kamu: ${p.avatar} ${p.name}`;
+  document.getElementById('wait-sub').textContent='Menunggu giliran...';
+  if(gs.status==='playing') goTo('screen-game');
+  else goTo('screen-waiting');
+}
+
+// ===== LISTEN GAME STATE =====
+function listenGameState(){
+  gameRef.on('value', snap=>{
+    const gs = snap.val();
+    if(!gs) return;
+    gameState = gs;
+    qCells_fill = gs.qCells_fill || [];
+    qCells_challenge = gs.qCells_challenge || [];
+    usedQ = new Set(gs.usedQ || []);
+    pendingCell = gs.pendingCell || 0;
+    if(gs.status==='playing'){
+      renderBoard(gs); renderPList(gs); updateTurn(gs);
+      const isMyCurrent = myRole==='guru' ? true : myKelompokIdx===gs.currentPlayer;
+      document.getElementById('roll-btn').disabled = !isMyCurrent || gs.question!=null;
+      if(gs.diceResult>0){
+        const face=document.getElementById('dice-face');
+        face.textContent=DICE_F[gs.diceResult]||'🎲';
+      }
+      document.getElementById('roll-msg').textContent=gs.rollMsg||'';
+      const obsInfo=document.getElementById('observer-info');
+      if(myRole==='guru'){
+        obsInfo.style.display='block';
+        obsInfo.innerHTML=`<div class="observer-badge">👩‍🏫 Mode Guru — Kamu bisa lempar dadu untuk semua kelompok</div>`;
+      } else { obsInfo.style.display='none'; }
+      if(gs.question && !questionAnswered){
+        showQFromState(gs.question, gs);
+      } else if(!gs.question && document.getElementById('screen-question').classList.contains('active') && !questionAnswered){
+        goTo('screen-game');
+      } else if(gs.question && questionAnswered){
+        // soal sudah dijawab, jangan render ulang — tunggu user klik "Lanjut"
+      }
+    } else if(gs.status==='finished'){
+      showFinish(gs);
+    }
+  });
+}
+
+// ===== BOARD =====
+function buildGrid(){
+  const g=[];
+  for(let r=0;r<6;r++) for(let c=0;c<6;c++){
+    const n=r%2===0?(5-r)*6+c+1:(5-r)*6+(5-c)+1;
+    g.push({n,r,c});
+  }
+  return g.sort((a,b)=>a.r*6+a.c-(b.r*6+b.c));
+}
+function renderBoard(gs){
+  const b=document.getElementById('board'); b.innerHTML='';
+  buildGrid().forEach(({n})=>{
+    const d=document.createElement('div'); d.className='cell'; d.id='cell-'+n;
+    const nm=`<span class="cell-num">${n}</span>`;
+    if(n===TOTAL){d.innerHTML=nm+'<span class="cell-icon">🏆</span>';d.classList.add('finish')}
+    else if(SNAKES[n]){d.innerHTML=nm+'<span class="cell-icon">🐍</span>';d.classList.add('snake')}
+    else if(LADDERS[n]){d.innerHTML=nm+'<span class="cell-icon">🪜</span>';d.classList.add('ladder')}
+    else if(qCells_challenge.includes(n)){d.innerHTML=nm+'<span class="cell-icon">⚡</span>';d.classList.add('q-challenge')}
+    else if(qCells_fill.includes(n)){d.innerHTML=nm+'<span class="cell-icon">✍️</span>';d.classList.add('q-fill')}
+    else d.innerHTML=nm;
+    b.appendChild(d);
+  });
+  if(gs) renderPieces(gs);
+}
+function renderPieces(gs){
+  document.querySelectorAll('.pieces').forEach(e=>e.remove());
+  document.querySelectorAll('.cell.glow').forEach(c=>c.classList.remove('glow'));
+  gs.players.forEach(p=>{
+    if(p.pos<1||p.pos>TOTAL)return;
+    const cell=document.getElementById('cell-'+p.pos); if(!cell)return;
+    cell.classList.add('glow');
+    let w=cell.querySelector('.pieces');
+    if(!w){w=document.createElement('div');w.className='pieces';cell.appendChild(w);}
+    const dot=document.createElement('div'); dot.className='piece'; dot.style.background=p.color; w.appendChild(dot);
+  });
+}
+function renderPList(gs){
+  document.getElementById('plist').innerHTML=gs.players.map((p,i)=>`
+    <div class="pitem ${i===gs.currentPlayer?'':''}">
+      <div class="pav" style="background:${p.color}22">${p.avatar}</div>
+      <div style="flex:1;min-width:0"><div class="pname">${p.name}</div><div class="pkotak">Kotak ${p.pos}</div></div>
+      <div class="pscore">✅${p.benar}</div>
+    </div>`).join('');
+}
+function updateTurn(gs){
+  const p=gs.players[gs.currentPlayer];
+  document.getElementById('turn-pill').textContent=`Giliran: ${p.avatar} ${p.name}`;
+}
+
+// ===== ROLL DICE =====
+function rollDice(){
+  if(!gameState||gameState.gameOver||gameState.question)return;
+  const roll=Math.floor(Math.random()*6)+1;
+  const face=document.getElementById('dice-face');
+  face.textContent=DICE_F[roll]; face.classList.remove('roll'); void face.offsetWidth; face.classList.add('roll');
+  document.getElementById('roll-btn').disabled=true;
+  const gs = JSON.parse(JSON.stringify(gameState));
+  const p=gs.players[gs.currentPlayer];
+  let np=p.pos+roll; if(np>TOTAL)np=TOTAL-(np-TOTAL);
+  p.pos=np;
+  gs.diceResult=roll;
+  gs.rollMsg=`${p.avatar} dapat ${roll}, ke kotak ${np}`;
+  gs.ts=Date.now();
+  // Decide next action
+  const isChallenge=qCells_challenge.includes(np);
+  const isFill=qCells_fill.includes(np);
+  if(np===TOTAL){
+    gs.status='finished'; gs.winner=gs.currentPlayer;
+    gameRef.set(gs);
+  } else if(isFill||isChallenge){
+    gs.pendingCell=np;
+    const pool=QUESTIONS.map((_,i)=>i).filter(i=>!usedQ.has(i)&&QUESTIONS[i].type===(isChallenge?'challenge':'fill'));
+    let pool2=pool.length?pool:QUESTIONS.map((_,i)=>i).filter(i=>QUESTIONS[i].type===(isChallenge?'challenge':'fill'));
+    const qi=pool2[Math.floor(Math.random()*pool2.length)];
+    const newUsed=[...usedQ,qi];
+    gs.usedQ=newUsed;
+    gs.question={qi,type:isChallenge?'challenge':'fill'};
+    gameRef.set(gs);
+  } else if(SNAKES[np]){
+    p.pos=SNAKES[np]; gs.rollMsg=`🐍 ${p.avatar} kena ular! Turun ke ${SNAKES[np]}`;
+    gs.currentPlayer=(gs.currentPlayer+1)%gs.players.length;
+    gs.diceResult=0; gs.question=null; gs.ts=Date.now();
+    gameRef.set(gs);
+  } else if(LADDERS[np]){
+    p.pos=LADDERS[np]; gs.rollMsg=`🪜 ${p.avatar} kena tangga! Naik ke ${LADDERS[np]}`;
+    gs.currentPlayer=(gs.currentPlayer+1)%gs.players.length;
+    gs.diceResult=0; gs.question=null; gs.ts=Date.now();
+    gameRef.set(gs);
+  } else {
+    gs.currentPlayer=(gs.currentPlayer+1)%gs.players.length;
+    gs.rollMsg=`Giliran ${gs.players[gs.currentPlayer].avatar} ${gs.players[gs.currentPlayer].name}`;
+    gs.diceResult=0; gs.question=null; gs.ts=Date.now();
+    gameRef.set(gs);
+  }
+}
+
+// ===== SHOW QUESTION =====
+function showQFromState(qInfo, gs){
+  const q=QUESTIONS[qInfo.qi];
+  const p=gs.players[gs.currentPlayer];
+  const isMyCurrent = myRole==='guru' ? true : myKelompokIdx===gs.currentPlayer;
+  document.getElementById('q-who').textContent=`${p.avatar} ${p.name}`;
+  document.getElementById('q-who').style.background=`linear-gradient(135deg,${p.color},${p.color}88)`;
+  const badge=document.getElementById('q-type-badge');
+  if(q.type==='fill'){badge.textContent='✍️ Isian Singkat';badge.className='q-type-badge type-fill';}
+  else{badge.textContent='⚡ Tantangan';badge.className='q-type-badge type-challenge';}
+  document.getElementById('q-num').textContent=`Soal — ${q.kat}`;
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-feedback').textContent='';
+  document.getElementById('q-feedback').className='q-feedback';
+  document.getElementById('q-explain').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  const area=document.getElementById('q-input-area'); area.innerHTML='';
+  if(!isMyCurrent){
+    area.innerHTML=`<div class="observer-q-msg">👀 Perhatikan kelompok <strong>${p.name}</strong> menjawab soal ini...</div>`;
+    document.getElementById('btn-next').style.display='none';
+  } else if(q.type==='fill'){
+    area.innerHTML=`<div class="fill-wrap"><div class="fill-hint">💡 ${q.hint}</div><input id="fill-input" class="fill-input" type="text" placeholder="Ketik jawabanmu..." autocomplete="off"><button class="btn-jawab" id="btn-jawab" onclick="submitFill(${qInfo.qi})">Jawab!</button></div>`;
+    setTimeout(()=>{ const i=document.getElementById('fill-input'); if(i){ i.focus(); i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('btn-jawab');if(b&&!b.disabled)submitFill(qInfo.qi);}});} },300);
+    startTimer(20,q,qInfo.qi,'fill',isMyCurrent);
+  } else {
+    const n=q.expect===1?1:3; let inp='';
+    for(let i=0;i<n;i++) inp+=`<input class="challenge-input" id="ch-${i}" type="text" placeholder="${q.expect===1?'Tuliskan penjelasanmu...':'Jawaban '+(i+1)+'...'}" autocomplete="off">`;
+    area.innerHTML=`<div class="challenge-wrap"><div class="challenge-desc">${q.desc}</div><div class="challenge-inputs">${inp}</div><div class="challenge-note">💡 Contoh: ${q.contoh}</div><button class="btn-jawab" id="btn-jawab" onclick="submitChallenge(${qInfo.qi})">Kumpulkan! 📤</button></div>`;
+    startTimer(40,q,qInfo.qi,'challenge',isMyCurrent);
+  }
+  if(!document.getElementById('screen-question').classList.contains('active')) goTo('screen-question');
+}
+
+let timerVal=0;
+function startTimer(sec,q,qi,type,canAnswer){
+  clearInterval(timerInt); timerVal=sec;
+  document.getElementById('q-timer-bar').style.width='100%';
+  document.getElementById('q-timer-bar').style.transition='none';
+  document.getElementById('q-timer-num').textContent='⏱ '+timerVal;
+  timerInt=setInterval(()=>{
+    timerVal--;
+    document.getElementById('q-timer-num').textContent='⏱ '+timerVal;
+    document.getElementById('q-timer-bar').style.transition='width 0.9s linear';
+    document.getElementById('q-timer-bar').style.width=(timerVal/sec*100)+'%';
+    if(timerVal<=0){ clearInterval(timerInt); if(canAnswer) timeUp(q,qi); }
+  },1000);
+}
+function timeUp(q,qi){
+  disableInputs();
+  document.getElementById('q-feedback').textContent='⏰ Waktu habis!';
+  document.getElementById('q-feedback').className='q-feedback no';
+  const exp=document.getElementById('q-explain');
+  exp.textContent=q.ans?`Jawaban: ${q.ans[0]}`:`Contoh: ${q.contoh}`;
+  exp.style.display='block';
+  submitResult(qi,false);
+}
+function disableInputs(){
+  document.querySelectorAll('.fill-input,.challenge-input').forEach(i=>i.disabled=true);
+  const b=document.getElementById('btn-jawab'); if(b)b.disabled=true;
+}
+function submitFill(qi){
+  clearInterval(timerInt);
+  const inp=document.getElementById('fill-input'); if(!inp)return;
+  const val=inp.value.trim().toLowerCase();
+  const q=QUESTIONS[qi];
+  const correct=q.ans.some(a=>val===a.toLowerCase()||val.includes(a.toLowerCase())||a.toLowerCase().includes(val));
+  disableInputs();
+  const fb=document.getElementById('q-feedback');
+  const exp=document.getElementById('q-explain');
+  // Salin gameState agar bisa dimodifikasi
+  const p=gameState.players[gameState.currentPlayer];
+  if(correct){
+    inp.classList.add('correct'); fb.textContent='✅ Benar! Keren!'; fb.className='q-feedback ok';
+    p.benar=(p.benar||0)+1;
+    if(LADDERS[pendingCell]){ p.pos=LADDERS[pendingCell]; exp.textContent='🪜 Naik tangga ke kotak '+LADDERS[pendingCell]; }
+    else { p.pos=pendingCell; exp.textContent='Tetap di kotak '+pendingCell+'.'; }
+  } else {
+    inp.classList.add('wrong'); fb.textContent='❌ Kurang tepat!'; fb.className='q-feedback no';
+    p.salah=(p.salah||0)+1;
+    if(SNAKES[pendingCell]){ p.pos=SNAKES[pendingCell]; exp.textContent='Jawaban: "'+q.ans[0]+'" | 🐍 Turun ular ke kotak '+SNAKES[pendingCell]; }
+    else { p.pos=pendingCell; exp.textContent='Jawaban yang benar: "'+q.ans[0]+'"'; }
+  }
+  exp.style.display='block';
+  forceShowNext();
+}
+function submitChallenge(qi){
+  clearInterval(timerInt);
+  const q=QUESTIONS[qi];
+  const inputs=document.querySelectorAll('.challenge-input');
+  let answered=0; inputs.forEach(i=>{if(i.value.trim().length>2)answered++;});
+  disableInputs();
+  const need=q.expect===1?1:2;
+  const correct=answered>=need;
+  const fb=document.getElementById('q-feedback');
+  const exp=document.getElementById('q-explain');
+  const p=gameState.players[gameState.currentPlayer];
+  if(correct){
+    fb.textContent='✅ Tantangan selesai!'; fb.className='q-feedback ok';
+    p.benar=(p.benar||0)+1;
+    if(LADDERS[pendingCell]){ p.pos=LADDERS[pendingCell]; exp.textContent='🪜 Naik tangga ke kotak '+LADDERS[pendingCell]; }
+    else { p.pos=pendingCell; exp.textContent='Tetap di kotak '+pendingCell+'.'; }
+  } else {
+    fb.textContent='❌ Kurang lengkap!'; fb.className='q-feedback no';
+    p.salah=(p.salah||0)+1;
+    if(SNAKES[pendingCell]){ p.pos=SNAKES[pendingCell]; exp.textContent='Contoh: '+q.contoh+' | 🐍 Turun ke kotak '+SNAKES[pendingCell]; }
+    else { p.pos=pendingCell; exp.textContent='Contoh jawaban: '+q.contoh; }
+  }
+  exp.style.display='block';
+  forceShowNext();
+}
+function forceShowNext(){
+  questionAnswered=true;
+  clearInterval(timerInt);
+  // Stop Firebase listener sementara supaya tidak override tampilan soal
+  gameRef.off();
+  // Paksa btn-next muncul dan bisa diklik
+  const btn=document.getElementById('btn-next');
+  if(btn){
+    btn.style.cssText='display:block !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;z-index:9999 !important;position:relative;';
+    // Scroll ke tombol supaya terlihat di layar kecil
+    setTimeout(()=>btn.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+  }
+}
+function closeQ(){
+  clearInterval(timerInt);
+  questionAnswered=false;
+  if(!gameState)return;
+  const gs=JSON.parse(JSON.stringify(gameState));
+  // Pastikan posisi pemain sudah terupdate (dari submitFill/submitChallenge yang memodifikasi gameState.players)
+  gs.currentPlayer=(gs.currentPlayer+1)%gs.players.length;
+  gs.question=null; gs.pendingCell=0; gs.diceResult=0;
+  gs.rollMsg=`Giliran ${gs.players[gs.currentPlayer].avatar} ${gs.players[gs.currentPlayer].name}`;
+  gs.ts=Date.now();
+  if(gs.players.some(p=>p.pos>=TOTAL)){
+    const w=gs.players.findIndex(p=>p.pos>=TOTAL);
+    gs.status='finished'; gs.winner=w;
+  }
+  gameRef.set(gs).then(()=>{
+    listenGameState();
+    goTo('screen-game');
+  }).catch(err=>{
+    console.error('closeQ error:',err);
+    listenGameState();
+    goTo('screen-game');
+  });
+}
+
+// ===== FINISH =====
+function showFinish(gs){
+  clearInterval(timerInt);
+  spawnConfetti();
+  const sorted=[...gs.players].sort((a,b)=>b.benar-a.benar||b.pos-a.pos);
+  const w=gs.winner!=null?gs.players[gs.winner]:sorted[0];
+  document.getElementById('fin-title').textContent=`${w.avatar} ${w.name} Menang!`;
+  document.getElementById('fin-sub').textContent=`Berhasil mencapai kotak ${TOTAL}! 🏆`;
+  const pod=document.getElementById('podium'); pod.innerHTML='';
+  const order=sorted.length>=3?[sorted[1],sorted[0],sorted[2]]:sorted.length===2?[null,sorted[0],sorted[1]]:[sorted[0]];
+  const cls=['pb2','pb1','pb3']; const med=['🥈','🥇','🥉'];
+  order.forEach((p,i)=>{
+    if(!p){pod.innerHTML+=`<div class="podium-item"><div class="pod-block ${cls[i]}" style="opacity:0.2"></div></div>`;return;}
+    pod.innerHTML+=`<div class="podium-item"><div class="pod-av">${p.avatar}</div><div class="pod-name">${p.name}</div><div class="pod-score">✅ ${p.benar}</div><div class="pod-block ${cls[i]}">${med[i]}</div></div>`;
+  });
+  document.getElementById('fin-scores').innerHTML=sorted.map((p,i)=>`
+    <div class="strow"><div class="rnum r${i+1}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+    <div style="display:flex;align-items:center;gap:7px">${p.avatar}<span>${p.name}</span></div>
+    <div style="text-align:center;color:var(--green);font-weight:800">${p.benar}</div>
+    <div style="text-align:center;color:var(--text2)">${p.pos}</div></div>`).join('');
+  goTo('screen-finish');
+}
+function resetGame(){ gameRef.set(null).then(()=>{ myRole=null; myKelompokIdx=null; gameState=null; goTo('screen-intro'); }); }
+function spawnConfetti(){
+  const cols=['#8b5cf6','#ec4899','#f59e0b','#22c55e','#38bdf8','#fde68a'];
+  for(let i=0;i<80;i++){
+    const e=document.createElement('div'); e.className='confetti-p';
+    e.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*1.5}s;transform:rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(e); e.addEventListener('animationend',()=>e.remove());
+  }
+}
+changeCount(0);
+
+// ===== AUDIO ENGINE =====
+let audioCtx = null;
+let bgmNodes = {};
+let bgmPlaying = false;
+let musicEnabled = true;
+
+function getCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// --- SFX helpers ---
+function playTone(freq, type, dur, vol=0.3, delay=0){
+  const ctx=getCtx();
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type=type; o.frequency.setValueAtTime(freq,ctx.currentTime+delay);
+  g.gain.setValueAtTime(0,ctx.currentTime+delay);
+  g.gain.linearRampToValueAtTime(vol,ctx.currentTime+delay+0.01);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+delay+dur);
+  o.start(ctx.currentTime+delay);
+  o.stop(ctx.currentTime+delay+dur+0.01);
+}
+function playNoise(dur, vol=0.15){
+  const ctx=getCtx();
+  const buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+  const src=ctx.createBufferSource();
+  src.buffer=buf;
+  const g=ctx.createGain();
+  const f=ctx.createBiquadFilter();
+  f.type='bandpass'; f.frequency.value=800;
+  src.connect(f); f.connect(g); g.connect(ctx.destination);
+  g.gain.setValueAtTime(vol,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+  src.start(); src.stop(ctx.currentTime+dur+0.01);
+}
+
+// --- Sound Effects ---
+function sfxDice(){
+  if(!musicEnabled) return;
+  // Rattling dice sound
+  for(let i=0;i<8;i++){
+    playNoise(0.06, 0.12+Math.random()*0.08);
+    playTone(200+Math.random()*400,'square',0.05,0.08,i*0.055);
+  }
+  playTone(600,'sine',0.15,0.2,0.45);
+}
+function sfxCorrect(){
+  if(!musicEnabled) return;
+  // Triumphant arpeggio
+  [523,659,784,1047].forEach((f,i)=>playTone(f,'sine',0.2,0.25,i*0.08));
+  setTimeout(()=>{
+    [784,1047,1319].forEach((f,i)=>playTone(f,'triangle',0.3,0.2,i*0.06));
+  },400);
+}
+function sfxWrong(){
+  if(!musicEnabled) return;
+  // Sad descending
+  [300,250,180].forEach((f,i)=>playTone(f,'sawtooth',0.25,0.2,i*0.12));
+  playTone(120,'square',0.4,0.15,0.4);
+}
+function sfxSnake(){
+  if(!musicEnabled) return;
+  // Slithery descend
+  const ctx=getCtx();
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type='sawtooth';
+  o.frequency.setValueAtTime(400,ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(80,ctx.currentTime+0.8);
+  g.gain.setValueAtTime(0.2,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.8);
+  o.start(); o.stop(ctx.currentTime+0.85);
+}
+function sfxLadder(){
+  if(!musicEnabled) return;
+  // Ascending glide
+  const ctx=getCtx();
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.type='sine';
+  o.frequency.setValueAtTime(200,ctx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.5);
+  g.gain.setValueAtTime(0.25,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);
+  o.start(); o.stop(ctx.currentTime+0.65);
+}
+function sfxWin(){
+  if(!musicEnabled) return;
+  stopBGM();
+  // Victory fanfare
+  const fanfare=[
+    [523,0],[659,0.15],[784,0.3],[1047,0.5],
+    [784,0.75],[1047,0.9],[1319,1.1],[1047,1.3],[1319,1.5]
+  ];
+  fanfare.forEach(([f,t])=>playTone(f,'sine',0.3,0.3,t));
+  // chord at end
+  [523,659,784,1047].forEach((f,i)=>playTone(f,'sine',1.2,0.2,2.0));
+}
+function sfxTick(){
+  if(!musicEnabled) return;
+  playTone(800,'square',0.05,0.08);
+}
+function sfxTimerEnd(){
+  if(!musicEnabled) return;
+  [400,300,200,100].forEach((f,i)=>playTone(f,'square',0.15,0.2,i*0.1));
+}
+function sfxQuestion(){
+  if(!musicEnabled) return;
+  // Dramatic sting
+  [200,400,600,500].forEach((f,i)=>playTone(f,'sawtooth',0.1,0.15,i*0.06));
+  playTone(300,'sine',0.3,0.25,0.3);
+}
+
+// --- Background Music: Dramatic Game Show ---
+function startBGM(){
+  if(!musicEnabled||bgmPlaying) return;
+  bgmPlaying=true;
+  playBGMLoop();
+}
+function stopBGM(){
+  bgmPlaying=false;
+  if(bgmNodes.masterGain){
+    try{ bgmNodes.masterGain.gain.setValueAtTime(bgmNodes.masterGain.gain.value, getCtx().currentTime); bgmNodes.masterGain.gain.linearRampToValueAtTime(0,getCtx().currentTime+0.4); }catch(e){}
+  }
+}
+
+function note(ctx, master, freq, type, start, dur, vol){
+  const o=ctx.createOscillator();
+  const g=ctx.createGain();
+  // Add slight reverb feel via second delayed gain
+  const rev=ctx.createGain();
+  o.connect(g); g.connect(master);
+  o.connect(rev); rev.gain.value=0.08; rev.connect(master);
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0,start);
+  g.gain.linearRampToValueAtTime(vol,start+0.015);
+  g.gain.setValueAtTime(vol,start+dur*0.6);
+  g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+  o.start(start); o.stop(start+dur+0.05);
+}
+function kick(ctx, master, start){
+  const o=ctx.createOscillator(); const g=ctx.createGain();
+  o.connect(g); g.connect(master);
+  o.type='sine';
+  o.frequency.setValueAtTime(180,start);
+  o.frequency.exponentialRampToValueAtTime(35,start+0.18);
+  g.gain.setValueAtTime(1.0,start);
+  g.gain.exponentialRampToValueAtTime(0.001,start+0.22);
+  o.start(start); o.stop(start+0.25);
+}
+function snare(ctx, master, start){
+  // noise burst
+  const buf=ctx.createBuffer(1,ctx.sampleRate*0.12,ctx.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+  const src=ctx.createBufferSource(); src.buffer=buf;
+  const f=ctx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=2500; f.Q.value=0.6;
+  const g=ctx.createGain();
+  src.connect(f); f.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0.5,start); g.gain.exponentialRampToValueAtTime(0.001,start+0.12);
+  src.start(start); src.stop(start+0.13);
+  // tone body
+  const o=ctx.createOscillator(); const go=ctx.createGain();
+  o.connect(go); go.connect(master); o.type='triangle'; o.frequency.value=200;
+  go.gain.setValueAtTime(0.15,start); go.gain.exponentialRampToValueAtTime(0.001,start+0.08);
+  o.start(start); o.stop(start+0.1);
+}
+function hihat(ctx, master, start, vol=0.15){
+  const buf=ctx.createBuffer(1,ctx.sampleRate*0.04,ctx.sampleRate);
+  const d=buf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1);
+  const src=ctx.createBufferSource(); src.buffer=buf;
+  const f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=9000;
+  const g=ctx.createGain();
+  src.connect(f); f.connect(g); g.connect(master);
+  g.gain.setValueAtTime(vol,start); g.gain.exponentialRampToValueAtTime(0.001,start+0.04);
+  src.start(start); src.stop(start+0.05);
+}
+
+function playBGMLoop(){
+  if(!bgmPlaying||!musicEnabled) return;
+  const ctx=getCtx();
+  const master=ctx.createGain();
+  master.gain.value=bgmPlaying?0.13:0;
+  master.connect(ctx.destination);
+  bgmNodes.masterGain=master;
+
+  const bpm=136, beat=60/bpm, now=ctx.currentTime;
+  const BARS=8, BEATS=BARS*4;
+
+  // === BASS (punchy game-show bass) ===
+  const bassSeq=[
+    130,0, 130,0, 146,0, 130,0,  130,0, 130,0, 164,0, 174,0,
+    130,0, 130,0, 146,0, 130,0,  146,0, 146,0, 164,0, 146,0,
+    130,0, 130,0, 146,0, 130,0,  130,0, 130,0, 164,0, 174,0,
+    196,0, 196,0, 174,0, 164,0,  146,0, 130,0, 116,0, 110,0,
+  ];
+  for(let i=0;i<bassSeq.length;i+=2){
+    const f=bassSeq[i]; if(!f) continue;
+    note(ctx,master,f,'square',now+i/2*beat,beat*0.7,0.45);
+  }
+
+  // === MELODY (dramatic synth lead) ===
+  const mel=[
+    [523,0,1.5],[0,0,0],[659,2,1],[784,3,1],
+    [880,4,2],[784,6,1],[659,7,1],
+    [784,8,1.5],[0,0,0],[1047,10,1],[880,11,1],
+    [784,12,1],[880,13,1],[784,14,2],
+    [659,16,1],[784,17,1],[880,18,2],[1047,20,1],[880,21,1],
+    [784,22,1],[659,23,1],
+    [880,24,1],[784,25,1],[659,26,1],[523,27,1],
+    [587,28,2],[523,30,2],
+  ];
+  mel.forEach(([f,i,len])=>{
+    if(!f) return;
+    note(ctx,master,f,'sawtooth',now+i*beat,beat*len*0.85,0.18);
+    note(ctx,master,f*2,'sine',now+i*beat,beat*len*0.6,0.06); // overtone
+  });
+
+  // === COUNTER MELODY (fills) ===
+  const counter=[
+    [1319,1,0.5],[1175,1.5,0.5],[1047,2.5,0.5],[1175,3.5,0.5],
+    [1047,9,0.5],[880,9.5,0.5],[784,10.5,0.5],[880,11.5,0.5],
+    [1319,17,0.5],[1175,17.5,0.5],[1047,18.5,0.5],[1175,19.5,0.5],
+    [1047,25,0.5],[880,25.5,0.5],[784,26.5,0.5],[659,27.5,0.5],
+  ];
+  counter.forEach(([f,i,len])=>{
+    note(ctx,master,f,'triangle',now+i*beat,beat*len,0.1);
+  });
+
+  // === CHORDS (pad) ===
+  [[523,659,784],[587,740,880],[523,659,784],[440,587,698]].forEach(([a,b,c],bar)=>{
+    const t=now+bar*8*beat;
+    [a,b,c].forEach(f=>note(ctx,master,f,'sine',t,beat*7.5,0.06));
+  });
+
+  // === DRUMS ===
+  for(let i=0;i<BEATS;i++){
+    const t=now+i*beat;
+    // kick on 1 and 3 of each bar
+    if(i%4===0||i%4===2) kick(ctx,master,t);
+    // snare on 2 and 4
+    if(i%4===1||i%4===3) snare(ctx,master,t);
+    // hihat every 8th
+    hihat(ctx,master,t,0.12);
+    hihat(ctx,master,t+beat*0.5,0.08);
+    // extra hihat on offbeats bars 3-4 and 7-8
+    if(i>=16&&i<24||i>=24) hihat(ctx,master,t+beat*0.25,0.06);
+  }
+
+  // === TENSION HITS on bar 4 and 8 ===
+  [[196,16*beat],[164,18*beat],[174,20*beat]].forEach(([f,d])=>{
+    note(ctx,master,f,'sawtooth',now+d,beat*0.8,0.3);
+  });
+  [[196,24*beat],[220,26*beat],[246,28*beat],[261,30*beat]].forEach(([f,d])=>{
+    note(ctx,master,f,'sawtooth',now+d,beat*0.8,0.3);
+  });
+
+  const loopDur=BEATS*beat;
+  setTimeout(()=>{ if(bgmPlaying&&musicEnabled) playBGMLoop(); }, loopDur*1000-80);
+}
+
+// --- Question timer tick sound ---
+function startTickSound(sec){
+  if(!musicEnabled) return;
+  let t=sec;
+  const iv=setInterval(()=>{
+    t--;
+    if(t<=5&&t>0) sfxTick();
+    if(t<=0){ sfxTimerEnd(); clearInterval(iv); }
+  },1000);
+  return iv;
+}
+let tickInterval=null;
+
+// --- Music toggle button ---
+function addMusicBtn(){
+  const btn=document.createElement('button');
+  btn.id='music-btn';
+  btn.textContent='🔊';
+  btn.title='Toggle musik';
+  btn.style.cssText='position:fixed;bottom:16px;right:16px;z-index:999;width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:18px;cursor:pointer;backdrop-filter:blur(8px);transition:all 0.2s;';
+  btn.onclick=()=>{
+    musicEnabled=!musicEnabled;
+    btn.textContent=musicEnabled?'🔊':'🔇';
+    if(musicEnabled){ getCtx(); startBGM(); }
+    else { stopBGM(); }
+  };
+  document.body.appendChild(btn);
+}
+addMusicBtn();
+
+// --- Patch existing functions to add sound ---
+const _origRollDice = rollDice;
+rollDice = function(){
+  getCtx();
+  sfxDice();
+  _origRollDice();
+};
+
+const _origSubmitFill = submitFill;
+submitFill = function(qi){
+  _origSubmitFill(qi);
+  setTimeout(()=>{
+    const fb=document.getElementById('q-feedback');
+    if(fb && fb.classList.contains('ok')) sfxCorrect();
+    else sfxWrong();
+  },100);
+};
+
+const _origSubmitChallenge = submitChallenge;
+submitChallenge = function(qi){
+  _origSubmitChallenge(qi);
+  setTimeout(()=>{
+    const fb=document.getElementById('q-feedback');
+    if(fb && fb.classList.contains('ok')) sfxCorrect();
+    else sfxWrong();
+  },100);
+};
+
+const _origShowFinish = showFinish;
+showFinish = function(gs){
+  sfxWin();
+  _origShowFinish(gs);
+};
+
+// Patch listenGameState to trigger audio on events
+const _origListenGameState = listenGameState;
+listenGameState = function(){
+  _origListenGameState();
+  // Watch for question appearing
+  gameRef.on('value', snap=>{
+    const gs=snap.val(); if(!gs) return;
+    const prevQ = gameState?.question;
+    if(gs.question && !prevQ) {
+      sfxQuestion();
+      if(tickInterval) clearInterval(tickInterval);
+      const sec = QUESTIONS[gs.question.qi]?.type==='challenge'?40:20;
+      tickInterval = startTickSound(sec);
+    }
+    if(!gs.question && prevQ) {
+      if(tickInterval){ clearInterval(tickInterval); tickInterval=null; }
+    }
+    // Snake/ladder sound from rollMsg
+    if(gs.rollMsg && gs.rollMsg!==gameState?.rollMsg){
+      if(gs.rollMsg.includes('ular')) setTimeout(sfxSnake,300);
+      else if(gs.rollMsg.includes('tangga')) setTimeout(sfxLadder,300);
+    }
+  });
+};
+
+// Start BGM on first user interaction
+document.addEventListener('click', ()=>{ if(musicEnabled&&!bgmPlaying){ getCtx(); setTimeout(startBGM,200); } }, {once:true});
+</script>
+</body>
+</html>
