@@ -11,21 +11,21 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0f0c29;--card:#1a1640;--purple:#8b5cf6;--pink:#ec4899;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--blue:#38bdf8;--text:#f1f5f9;--text2:#94a3b8}
 body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(109,40,217,0.25) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(236,72,153,0.2) 0%,transparent 55%);pointer-events:none;z-index:0}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(109,40,217,0.25) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(236,72,153,0.2) 0%,transparent 55%);pointer-events:none}
 .screen{display:none;position:relative;z-index:1;min-height:100vh;padding:20px;flex-direction:column;align-items:center;justify-content:center}
 .screen.active{display:flex}
 
 /* INTRO */
 #screen-intro{text-align:center;gap:16px}
-.intro-badge{display:inline-block;background:linear-gradient(135deg,var(--purple),var(--pink));font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:6px 18px;border-radius:999px;animation:pulse 2s infinite}
+.intro-badge{display:inline-block;background:linear-gradient(135deg,var(--purple),var(--pink));font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:6px 18px;border-radius:999px;color:white;margin-bottom:8px}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)}50%{box-shadow:0 0 0 10px rgba(139,92,246,0)}}
-.intro-title{font-family:'Fredoka One',cursive;font-size:clamp(34px,8vw,64px);line-height:1.05;background:linear-gradient(135deg,#c4b5fd,#f9a8d4,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3s ease-in-out infinite}
+.intro-title{font-family:'Fredoka One',cursive;font-size:clamp(34px,8vw,64px);line-height:1.05;background:linear-gradient(135deg,#c4b5fd,#f9a8d4,#fde68a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pulse 2s infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .intro-sub{font-size:15px;color:var(--text2);font-weight:700}
 .intro-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;color:var(--text2)}
 .chip span{color:var(--text)}
-.btn-main{padding:14px 36px;font-family:'Fredoka One',cursive;font-size:19px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;box-shadow:0 0 24px rgba(139,92,246,0.5);transition:transform 0.15s}
+.btn-main{padding:14px 36px;font-family:'Fredoka One',cursive;font-size:19px;border-radius:16px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;transition:all 0.2s;font-weight:800}
 .btn-main:hover{transform:scale(1.05)}
 .btn-main:active{transform:scale(0.97)}
 .btn-main:disabled{opacity:0.5;cursor:not-allowed;transform:none}
@@ -46,7 +46,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .count-row{display:flex;align-items:center;gap:12px;justify-content:center}
 .cnt-btn{width:40px;height:40px;border-radius:50%;border:2px solid var(--purple);background:transparent;color:var(--purple);font-size:20px;font-weight:800;cursor:pointer;transition:all 0.15s}
 .cnt-btn:hover{background:var(--purple);color:white}
-#cnt-num{font-family:'Fredoka One',cursive;font-size:36px;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;min-width:50px;text-align:center}
+#cnt-num{font-family:'Fredoka One',cursive;font-size:36px;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 #pform{width:100%;max-width:440px;display:flex;flex-direction:column;gap:9px}
 .pinput-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;transition:border-color 0.2s}
 .pinput-row:focus-within{border-color:var(--purple)}
@@ -59,10 +59,10 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* JOIN SISWA */
 #screen-join{gap:16px;text-align:center}
 .join-title{font-family:'Fredoka One',cursive;font-size:26px;background:linear-gradient(135deg,#c4b5fd,#f9a8d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.join-input{width:100%;max-width:340px;padding:14px 18px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text);outline:none;text-align:center}
+.join-input{width:100%;max-width:340px;padding:14px 18px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text)}
 .join-input:focus{border-color:var(--purple)}
 .kelompok-list{width:100%;max-width:340px;display:flex;flex-direction:column;gap:8px}
-.kelompok-btn{padding:12px 16px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;border-radius:14px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:10px}
+.kelompok-btn{padding:12px 16px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;border-radius:14px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px}
 .kelompok-btn:hover{border-color:var(--purple);background:rgba(139,92,246,0.15)}
 .kelompok-btn.joined{border-color:var(--green);background:rgba(34,197,94,0.12);color:#86efac}
 .kelompok-btn:disabled{opacity:0.4;cursor:not-allowed}
@@ -87,7 +87,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .g-body{display:grid;grid-template-columns:1fr 185px;gap:10px;flex:1}
 @media(max-width:580px){.g-body{grid-template-columns:1fr}}
 #board{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
-.cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.06);background:var(--card);position:relative;transition:transform 0.2s;overflow:visible}
+.cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,0.06);background:var(--card);position:relative}
 .cell-num{font-size:8px;font-weight:900;color:var(--text2);position:absolute;top:2px;left:3px;line-height:1}
 .cell-icon{font-size:13px;line-height:1}
 .cell.snake{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4)}
@@ -111,7 +111,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 #dice-face{font-size:40px;margin:3px 0 7px}
 #dice-face.roll{animation:droll 0.5s ease}
 @keyframes droll{0%{transform:rotate(0)scale(1)}30%{transform:rotate(-20deg)scale(1.2)}70%{transform:rotate(15deg)scale(1.2)}100%{transform:rotate(0)scale(1)}}
-#roll-btn{width:100%;padding:9px;font-family:'Fredoka One',cursive;font-size:15px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;transition:transform 0.15s,opacity 0.15s}
+#roll-btn{width:100%;padding:9px;font-family:'Fredoka One',cursive;font-size:15px;border-radius:12px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-weight:800;transition:all 0.2s}
 #roll-btn:hover:not(:disabled){transform:scale(1.04)}
 #roll-btn:disabled{opacity:0.4;cursor:not-allowed}
 #roll-msg{font-size:11px;font-weight:700;color:var(--text2);margin-top:6px;min-height:26px;line-height:1.4;text-align:center}
@@ -123,7 +123,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 /* SOAL */
 #screen-question{justify-content:stretch;align-items:stretch;padding:0}
 .qscreen-wrap{display:flex;flex-direction:column;min-height:100vh;width:100%}
-.q-top{padding:14px 18px 10px;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(236,72,153,0.2));border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.q-top{padding:14px 18px 10px;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(236,72,153,0.2));border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;gap:12px}
 .q-who{padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800}
 .q-type-badge{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:800}
 .type-fill{background:rgba(56,189,248,0.2);color:#7dd3fc;border:1px solid rgba(56,189,248,0.3)}
@@ -137,31 +137,31 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 @keyframes qin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .fill-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
 .fill-hint{font-size:13px;color:var(--text2);font-weight:600}
-.fill-input{width:100%;max-width:400px;padding:13px 16px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text);outline:none;text-align:center;transition:border-color 0.2s}
+.fill-input{width:100%;max-width:400px;padding:13px 16px;font-family:'Nunito',sans-serif;font-size:16px;font-weight:700;border-radius:14px;border:2px solid rgba(255,255,255,0.15);background:var(--card);color:var(--text)}
 .fill-input:focus{border-color:var(--blue)}
 .fill-input.correct{border-color:var(--green);background:rgba(34,197,94,0.1)}
 .fill-input.wrong{border-color:var(--red);background:rgba(239,68,68,0.1)}
-.btn-jawab{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:16px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;transition:transform 0.15s}
-.btn-jawab:hover{transform:scale(1.04)}
+.btn-jawab{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:16px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--blue),var(--purple));color:white;font-weight:800;transition:all 0.2s}
+.btn-jawab:hover:not(:disabled){transform:scale(1.04)}
 .btn-jawab:disabled{opacity:0.4;cursor:not-allowed}
 .challenge-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:10px}
 .challenge-desc{font-size:14px;color:var(--text2);font-weight:600;text-align:center;line-height:1.5}
 .challenge-inputs{width:100%;max-width:400px;display:flex;flex-direction:column;gap:8px}
-.challenge-input{padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;border-radius:12px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text);outline:none;transition:border-color 0.2s}
+.challenge-input{padding:11px 14px;font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;border-radius:12px;border:2px solid rgba(255,255,255,0.12);background:var(--card);color:var(--text)}
 .challenge-input:focus{border-color:var(--amber)}
 .challenge-note{font-size:11px;color:var(--text2);font-weight:600;text-align:center}
 .q-feedback{font-family:'Fredoka One',cursive;font-size:20px;min-height:28px;text-align:center}
 .q-feedback.ok{color:var(--green);animation:pop 0.4s ease}
 .q-feedback.no{color:var(--red);animation:pop 0.4s ease}
 @keyframes pop{0%{transform:scale(0.8)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
-.q-explain{font-size:13px;font-weight:600;color:var(--text2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;max-width:500px;display:none;text-align:center;line-height:1.6}
-#btn-next{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:17px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;display:none;animation:qin 0.3s ease}
+.q-explain{font-size:13px;font-weight:600;color:var(--text2);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;max-width:500px;display:none}
+#btn-next{padding:11px 28px;font-family:'Fredoka One',cursive;font-size:17px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:white;font-weight:800;transition:all 0.2s;display:none}
 #btn-next:hover{transform:scale(1.04)}
 .observer-q-msg{text-align:center;padding:16px;background:rgba(56,189,248,0.1);border:1px solid rgba(56,189,248,0.2);border-radius:14px;color:#7dd3fc;font-size:14px;font-weight:700;max-width:400px}
 
 /* FINISH */
 #screen-finish{text-align:center;gap:18px;background:radial-gradient(ellipse at center,rgba(139,92,246,0.3) 0%,transparent 70%),var(--bg)}
-.fin-title{font-family:'Fredoka One',cursive;font-size:clamp(28px,7vw,54px);background:linear-gradient(135deg,#fde68a,#f9a8d4,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3s ease-in-out infinite}
+.fin-title{font-family:'Fredoka One',cursive;font-size:clamp(28px,7vw,54px);background:linear-gradient(135deg,#fde68a,#f9a8d4,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .podium-wrap{display:flex;align-items:flex-end;justify-content:center;gap:8px}
 .podium-item{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:86px}
 .pod-av{font-size:28px}
@@ -370,20 +370,20 @@ const QUESTIONS = [
   {type:'fill',q:'Buku berisi catatan perjalanan nyata yang dialami penulis disebut buku ___',ans:['perjalanan','catatan perjalanan'],hint:'Sering berisi foto destinasi wisata',kat:'Jenis Nonfiksi'},
   {type:'fill',q:'Puncak ketegangan dalam alur cerita disebut ___',ans:['klimaks'],hint:'Setelah ini biasanya ada penyelesaian',kat:'Unsur Intrinsik'},
   {type:'challenge',q:'Sebutkan 3 contoh buku FIKSI yang kamu ketahui!',desc:'Tuliskan judul atau jenis buku fiksi',expect:3,kat:'Buku Fiksi',contoh:'Laskar Pelangi, Cinderella, Malin Kundang'},
-  {type:'challenge',q:'Sebutkan 3 contoh buku NONFIKSI yang kamu ketahui!',desc:'Bisa berupa judul buku atau jenis buku nonfiksi',expect:3,kat:'Buku Nonfiksi',contoh:'Ensiklopedia, Biografi Soekarno, Kamus Bahasa Indonesia'},
+  {type:'challenge',q:'Sebutkan 3 contoh buku NONFIKSI yang kamu ketahui!',desc:'Bisa berupa judul buku atau jenis buku nonfiksi',expect:3,kat:'Buku Nonfiksi',contoh:'Ensiklopedia, Biografi Soekarno, Buku Sejarah'},
   {type:'challenge',q:'Sebutkan 3 unsur INTRINSIK dalam buku fiksi!',desc:'Tuliskan nama unsur intrinsiknya',expect:3,kat:'Unsur Intrinsik',contoh:'Tema, alur, tokoh, latar, amanat, sudut pandang'},
   {type:'challenge',q:'Jelaskan perbedaan FIKSI dan NONFIKSI dengan kalimatmu sendiri!',desc:'Tuliskan penjelasanmu di bawah ini',expect:1,kat:'Perbedaan',contoh:'Fiksi berisi cerita rekaan, nonfiksi berisi fakta nyata'},
   {type:'challenge',q:'Sebutkan 3 jenis cerita fiksi yang kamu tahu!',desc:'Contoh: novel, cerpen... apa lagi?',expect:3,kat:'Jenis Fiksi',contoh:'Novel, cerpen, dongeng, fabel, legenda, mite, komik'},
-  {type:'challenge',q:'Sebutkan 3 ciri-ciri buku NONFIKSI!',desc:'Tuliskan ciri-cirinya satu per satu',expect:3,kat:'Buku Nonfiksi',contoh:'Berisi fakta nyata, dapat diverifikasi, menggunakan bahasa formal'},
-  {type:'challenge',q:'Sebutkan 3 jenis buku nonfiksi beserta contohnya!',desc:'Format: jenis — contoh',expect:3,kat:'Jenis Nonfiksi',contoh:'Biografi — Biografi Soekarno, Ensiklopedia — Ensiklopedia Indonesia'},
-  {type:'challenge',q:'Sebutkan 3 bagian/struktur yang biasa ada dalam sebuah buku!',desc:'Bagian dari depan sampai belakang buku',expect:3,kat:'Struktur Buku',contoh:'Cover, daftar isi, kata pengantar, isi/bab, glosarium, indeks'},
-  {type:'challenge',q:'Sebutkan 3 manfaat membaca buku nonfiksi!',desc:'Tuliskan manfaatnya',expect:3,kat:'Manfaat Membaca',contoh:'Menambah pengetahuan, memperluas wawasan, meningkatkan kosa kata'},
+  {type:'challenge',q:'Sebutkan 3 ciri-ciri buku NONFIKSI!',desc:'Tuliskan ciri-cirinya satu per satu',expect:3,kat:'Buku Nonfiksi',contoh:'Berisi fakta nyata, dapat diverifikasi, menggunakan bahasa baku'},
+  {type:'challenge',q:'Sebutkan 3 jenis buku nonfiksi beserta contohnya!',desc:'Format: jenis — contoh',expect:3,kat:'Jenis Nonfiksi',contoh:'Biografi — Biografi Soekarno, Ensiklopedia — Ensiklopedia Umum'},
+  {type:'challenge',q:'Sebutkan 3 bagian/struktur yang biasa ada dalam sebuah buku!',desc:'Bagian dari depan sampai belakang buku',expect:3,kat:'Struktur Buku',contoh:'Cover, daftar isi, kata pengantar, isi, lampiran, daftar pustaka'},
+  {type:'challenge',q:'Sebutkan 3 manfaat membaca buku nonfiksi!',desc:'Tuliskan manfaatnya',expect:3,kat:'Manfaat Membaca',contoh:'Menambah pengetahuan, memperluas wawasan, meningkatkan kosakata'},
   {type:'challenge',q:'Sebutkan 3 manfaat membaca buku fiksi!',desc:'Tuliskan alasannya',expect:3,kat:'Manfaat Membaca',contoh:'Melatih imajinasi, menambah kosakata, mengembangkan empati'},
-  {type:'challenge',q:'Sebutkan 3 hal yang membedakan novel dan cerpen!',desc:'Tuliskan perbedaannya',expect:3,kat:'Jenis Fiksi',contoh:'Novel lebih panjang, cerpen lebih singkat. Novel banyak tokoh, cerpen sedikit tokoh'},
-  {type:'challenge',q:'Sebutkan 3 unsur EKSTRINSIK yang mempengaruhi buku fiksi!',desc:'Faktor di luar cerita yang mempengaruhi penulisan',expect:3,kat:'Unsur Ekstrinsik',contoh:'Latar belakang pengarang, kondisi sosial budaya, nilai moral masyarakat'},
-  {type:'challenge',q:'Ceritakan isi sebuah buku fiksi yang pernah kamu baca dalam 2-3 kalimat!',desc:'Sebutkan judulnya dulu, lalu ringkas ceritanya',expect:1,kat:'Apresiasi Sastra',contoh:'Laskar Pelangi: Kisah 10 anak dari keluarga miskin di Belitung yang berjuang sekolah...'},
-  {type:'challenge',q:'Sebutkan 3 pertanyaan yang bisa kamu buat setelah membaca buku nonfiksi!',desc:'Gunakan kata tanya 5W+1H',expect:3,kat:'Membaca Kritis',contoh:'Apa tujuan penulis? Siapa tokoh yang dibahas? Kapan peristiwa terjadi?'},
-  {type:'challenge',q:'Sebutkan 3 cara membedakan buku fiksi dan nonfiksi hanya dari melihat sampulnya!',desc:'Ciri-ciri yang bisa dilihat dari luar',expect:3,kat:'Perbedaan',contoh:'Genre di sampul, nama penulis fiksi vs akademisi, ilustrasi vs foto nyata'}
+  {type:'challenge',q:'Sebutkan 3 hal yang membedakan novel dan cerpen!',desc:'Tuliskan perbedaannya',expect:3,kat:'Jenis Fiksi',contoh:'Novel lebih panjang, cerpen lebih singkat. Novel banyak tokoh, cerpen sedikit'},
+  {type:'challenge',q:'Sebutkan 3 unsur EKSTRINSIK yang mempengaruhi buku fiksi!',desc:'Faktor di luar cerita yang mempengaruhi penulisan',expect:3,kat:'Unsur Ekstrinsik',contoh:'Latar belakang penulis, budaya, kondisi sosial saat menulis'},
+  {type:'challenge',q:'Ceritakan isi sebuah buku fiksi yang pernah kamu baca dalam 2-3 kalimat!',desc:'Sebutkan judulnya dulu, lalu ringkas ceritanya',expect:1,kat:'Apresiasi Sastra',contoh:'Laskar Pelangi menceritakan tentang anak-anak di Belitong yang bersemangat sekolah'},
+  {type:'challenge',q:'Sebutkan 3 pertanyaan yang bisa kamu buat setelah membaca buku nonfiksi!',desc:'Gunakan kata tanya 5W+1H',expect:3,kat:'Membaca Kritis',contoh:'Apa tujuan penulis? Siapa tokoh utama? Bagaimana caranya?'},
+  {type:'challenge',q:'Sebutkan 3 cara membedakan buku fiksi dan nonfiksi hanya dari melihat sampulnya!',desc:'Ciri-ciri yang bisa dilihat dari luar',expect:3,kat:'Perbedaan',contoh:'Genre di sampul, jenis ilustrasi, penulisan pengarang'}
 ];
 
 // ===== STATE =====
@@ -632,13 +632,13 @@ function showQFromState(qInfo, gs){
     area.innerHTML=`<div class="observer-q-msg">👀 Perhatikan kelompok <strong>${p.name}</strong> menjawab soal ini...</div>`;
     document.getElementById('btn-next').style.display='none';
   } else if(q.type==='fill'){
-    area.innerHTML=`<div class="fill-wrap"><div class="fill-hint">💡 ${q.hint}</div><input id="fill-input" class="fill-input" type="text" placeholder="Ketik jawabanmu..." autocomplete="off"><button class="btn-jawab" id="btn-jawab" onclick="submitFill(${qInfo.qi})">Jawab!</button></div>`;
-    setTimeout(()=>{ const i=document.getElementById('fill-input'); if(i){ i.focus(); i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('btn-jawab');if(b&&!b.disabled)submitFill(qInfo.qi);}});} },300);
+    area.innerHTML=`<div class="fill-wrap"><div class="fill-hint">💡 ${q.hint}</div><input id="fill-input" class="fill-input" type="text" placeholder="Ketik jawabanmu..." autocomplete="off"><button id="btn-jawab" class="btn-jawab" onclick="submitFill(${qInfo.qi})">Jawab 📝</button></div>`;
+    setTimeout(()=>{ const i=document.getElementById('fill-input'); if(i){ i.focus(); i.addEventListener('keydown',e=>{if(e.key==='Enter'){const b=document.getElementById('btn-jawab');if(b&&!b.disabled)submitFill(${qInfo.qi});}});}},100);
     startTimer(20,q,qInfo.qi,'fill',isMyCurrent);
   } else {
     const n=q.expect===1?1:3; let inp='';
     for(let i=0;i<n;i++) inp+=`<input class="challenge-input" id="ch-${i}" type="text" placeholder="${q.expect===1?'Tuliskan penjelasanmu...':'Jawaban '+(i+1)+'...'}" autocomplete="off">`;
-    area.innerHTML=`<div class="challenge-wrap"><div class="challenge-desc">${q.desc}</div><div class="challenge-inputs">${inp}</div><div class="challenge-note">💡 Contoh: ${q.contoh}</div><button class="btn-jawab" id="btn-jawab" onclick="submitChallenge(${qInfo.qi})">Kumpulkan! 📤</button></div>`;
+    area.innerHTML=`<div class="challenge-wrap"><div class="challenge-desc">${q.desc}</div><div class="challenge-inputs">${inp}</div><div class="challenge-note">💡 Contoh: ${q.contoh}</div><button id="btn-jawab" class="btn-jawab" onclick="submitChallenge(${qInfo.qi})">Kirim 🚀</button></div>`;
     startTimer(40,q,qInfo.qi,'challenge',isMyCurrent);
   }
   if(!document.getElementById('screen-question').classList.contains('active')) goTo('screen-question');
@@ -665,6 +665,7 @@ function timeUp(q,qi){
   const exp=document.getElementById('q-explain');
   exp.textContent=q.ans?`Jawaban: ${q.ans[0]}`:`Contoh: ${q.contoh}`;
   exp.style.display='block';
+  document.getElementById('btn-next').style.display='block';
   submitResult(qi,false);
 }
 function disableInputs(){
@@ -680,9 +681,10 @@ function submitFill(qi){
   disableInputs();
   const fb=document.getElementById('q-feedback');
   const exp=document.getElementById('q-explain');
-  if(correct){ inp.classList.add('correct'); fb.textContent='🎉 Benar!'; fb.className='q-feedback ok'; exp.textContent=LADDERS[pendingCell]?`✅ Naik tangga ke kotak ${LADDERS[pendingCell]} 🪜`:`✅ Tetap di kotak ${pendingCell}.`; }
+  if(correct){ inp.classList.add('correct'); fb.textContent='🎉 Benar!'; fb.className='q-feedback ok'; exp.textContent=LADDERS[pendingCell]?`✅ Naik tangga ke kotak ${LADDERS[pendingCell]} 🪜`:`✅ Tetap di kotak ini`;}
   else{ inp.classList.add('wrong'); fb.textContent='❌ Kurang tepat!'; fb.className='q-feedback no'; exp.textContent=`Jawaban: "${q.ans[0]}"${SNAKES[pendingCell]?' | Turun ular ke kotak '+SNAKES[pendingCell]+' 🐍':''}`; }
   exp.style.display='block';
+  document.getElementById('btn-next').style.display='block';
   submitResult(qi,correct);
 }
 function submitChallenge(qi){
@@ -695,18 +697,17 @@ function submitChallenge(qi){
   const correct=answered>=need;
   const fb=document.getElementById('q-feedback');
   const exp=document.getElementById('q-explain');
-  if(correct){ fb.textContent='🎉 Tantangan selesai!'; fb.className='q-feedback ok'; exp.textContent=LADDERS[pendingCell]?`✅ Naik tangga ke kotak ${LADDERS[pendingCell]} 🪜`:`✅ Tetap di kotak ${pendingCell}.`; }
+  if(correct){ fb.textContent='🎉 Tantangan selesai!'; fb.className='q-feedback ok'; exp.textContent=LADDERS[pendingCell]?`✅ Naik tangga ke kotak ${LADDERS[pendingCell]} 🪜`:`✅ Tetap di kotak ini`; }
   else{ fb.textContent='❌ Kurang lengkap!'; fb.className='q-feedback no'; exp.textContent=`Contoh: ${q.contoh}${SNAKES[pendingCell]?' | Turun ke kotak '+SNAKES[pendingCell]+' 🐍':''}`; }
   exp.style.display='block';
+  document.getElementById('btn-next').style.display='block';
   submitResult(qi,correct);
 }
 function submitResult(qi,correct){
-  document.getElementById('btn-next').style.display='block';
   const gs=JSON.parse(JSON.stringify(gameState));
   const p=gs.players[gs.currentPlayer];
   if(correct){ p.benar++; if(LADDERS[pendingCell])p.pos=LADDERS[pendingCell]; }
   else{ p.salah++; if(SNAKES[pendingCell])p.pos=SNAKES[pendingCell]; }
-  gs._pendingAdvance={correct};
   gameRef.update({players:gs.players});
 }
 function closeQ(){
@@ -751,7 +752,7 @@ function spawnConfetti(){
   const cols=['#8b5cf6','#ec4899','#f59e0b','#22c55e','#38bdf8','#fde68a'];
   for(let i=0;i<80;i++){
     const e=document.createElement('div'); e.className='confetti-p';
-    e.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*1.5}s;transform:rotate(${Math.random()*360}deg)`;
+    e.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${cols[Math.floor(Math.random()*cols.length)]};width:${6+Math.random()*8}px;height:${6+Math.random()*8}px;animation-duration:${2+Math.random()*1}s;animation-delay:0s`;
     document.body.appendChild(e); e.addEventListener('animationend',()=>e.remove());
   }
 }
