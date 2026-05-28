@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎲 Kuis Ular Tangga — Fiksi & Nonfiksi Kelas 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1830;
+    --card: #221f38;
+    --border: #3a3560;
+    --accent1: #ff6b6b;
+    --accent2: #ffd93d;
+    --accent3: #6bcb77;
+    --accent4: #4d96ff;
+    --accent5: #c77dff;
+    --text: #fffffe;
+    --text2: #a7a9be;
+    --snake: #ff6b6b;
+    --ladder: #6bcb77;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ===== SCREENS ===== */
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ===== SCREEN: HOME ===== */
+  #screen-home {
+    background: radial-gradient(ellipse at 30% 20%, #2d1b69 0%, #0f0e17 60%),
+                radial-gradient(ellipse at 80% 80%, #1a0a2e 0%, transparent 50%);
+    text-align: center;
+    gap: 24px;
+  }
+  .home-emoji { font-size: 80px; animation: bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+  .home-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    background: linear-gradient(135deg, var(--accent2) 0%, var(--accent1) 50%, var(--accent5) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+  }
+  .home-sub { color: var(--text2); font-size: 1.1rem; font-weight: 600; }
+  .home-badges { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 8px 0; }
+  .badge {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 30px; padding: 6px 16px; font-size: 0.85rem; font-weight: 700;
+    color: var(--text2);
+  }
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1.1rem;
+    padding: 14px 36px; border: none; border-radius: 50px;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent1));
+    color: #1a0a00;
+  }
+  .btn-secondary {
+    background: var(--card); color: var(--text); border: 2px solid var(--border);
+  }
+  .btn-green { background: linear-gradient(135deg, #6bcb77, #4caf50); color: #001a00; }
+  .btn-sm { font-size: 0.95rem; padding: 10px 24px; }
+
+  /* ===== SCREEN: SETUP ===== */
+  #screen-setup { gap: 20px; max-width: 500px; width: 100%; }
+  .setup-title { font-family: 'Fredoka One', cursive; font-size: 2rem; color: var(--accent2); text-align: center; }
+  .setup-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; width: 100%;
+  }
+  .setup-label { font-weight: 700; color: var(--text2); margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+  .group-count-ctrl { display: flex; align-items: center; gap: 16px; justify-content: center; }
+  .count-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 1.5rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; transition: all 0.15s;
+  }
+  .count-btn:hover { border-color: var(--accent4); color: var(--accent4); }
+  .count-val { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--accent2); min-width: 40px; text-align: center; }
+  .group-inputs { display: flex; flex-direction: column; gap: 8px; }
+  .group-input {
+    background: var(--surface); border: 2px solid var(--border); border-radius: 12px;
+    padding: 10px 16px; color: var(--text); font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 600; outline: none; transition: border-color 0.2s;
+  }
+  .group-input:focus { border-color: var(--accent4); }
+  .group-input::placeholder { color: var(--text2); }
+
+  /* ===== SCREEN: GAME ===== */
+  #screen-game {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    max-width: 100%;
+  }
+  #screen-game.active { display: flex; }
+  .game-header {
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 12px 20px;
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+  .game-header-title { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--accent2); }
+  .scoreboard { display: flex; gap: 8px; flex-wrap: wrap; }
+  .score-chip {
+    padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.85rem;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .game-body {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+  }
+  @media (max-width: 900px) {
+    .game-body { grid-template-columns: 1fr; }
+    .game-sidebar { border-left: none; border-top: 2px solid var(--border); }
+  }
+  .board-wrap {
+    padding: 20px;
+    display: flex; align-items: flex-start; justify-content: center;
+    overflow: auto;
+  }
+  #board {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 3px;
+    width: min(560px, 90vw);
+    aspect-ratio: 1;
+  }
+  .cell {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: default; transition: transform 0.2s;
+    font-size: 0.7rem; font-weight: 700; color: var(--text2);
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+  .cell.snake-head { background: rgba(255,107,107,0.25); border-color: var(--snake); }
+  .cell.snake-tail { background: rgba(255,107,107,0.1); border-color: rgba(255,107,107,0.4); }
+  .cell.ladder-bottom { background: rgba(107,203,119,0.25); border-color: var(--ladder); }
+  .cell.ladder-top { background: rgba(107,203,119,0.1); border-color: rgba(107,203,119,0.4); }
+  .cell-num { position: absolute; top: 2px; left: 4px; font-size: 0.6rem; color: var(--text2); opacity: 0.7; }
+  .cell-icon { font-size: 1rem; }
+  .pawns { display: flex; flex-wrap: wrap; gap: 1px; justify-content: center; }
+  .pawn {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+    font-size: 8px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.5s;
+  }
+
+  .game-sidebar {
+    border-left: 2px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 20px; gap: 16px;
+    overflow-y: auto;
+    background: var(--surface);
+  }
+  .sidebar-section-title { font-weight: 800; color: var(--text2); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+  .turn-display {
+    background: var(--card); border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; text-align: center;
+  }
+  .turn-label { font-size: 0.85rem; color: var(--text2); font-weight: 600; }
+  .turn-name { font-family: 'Fredoka One', cursive; font-size: 1.6rem; }
+  .dice-area { text-align: center; }
+  .dice-face {
+    width: 72px; height: 72px; background: var(--text); border-radius: 12px;
+    margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; transition: transform 0.4s; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .dice-face.rolling { animation: roll 0.4s ease; }
+  @keyframes roll { 0%{transform:rotate(0)} 50%{transform:rotate(180deg) scale(1.2)} 100%{transform:rotate(360deg)} }
+  .log-area {
+    background: var(--card); border-radius: var(--radius); padding: 12px;
+    font-size: 0.85rem; line-height: 1.6; max-height: 160px; overflow-y: auto;
+    color: var(--text2);
+  }
+  .log-item { padding: 2px 0; }
+  .log-item span { font-weight: 700; }
+
+  /* ===== MODAL: QUESTION ===== */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+    z-index: 100; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 24px; padding: 28px; max-width: 520px; width: 100%;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    animation: popIn 0.25s ease;
+  }
+  @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .modal-badge {
+    padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;
+  }
+  .timer-bar-wrap { height: 6px; background: var(--surface); border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+  .timer-bar { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent2)); border-radius: 4px; transition: width 1s linear; }
+  .q-text { font-size: 1.1rem; font-weight: 700; line-height: 1.5; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--surface); border: 2px solid var(--border);
+    border-radius: 12px; padding: 12px 16px; text-align: left;
+    color: var(--text); font-family: 'Nunito', sans-serif; font-weight: 600;
+    font-size: 0.95rem; cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent4); background: rgba(77,150,255,0.1); }
+  .option-btn.correct { border-color: var(--accent3) !important; background: rgba(107,203,119,0.2) !important; color: var(--accent3); }
+  .option-btn.wrong { border-color: var(--accent1) !important; background: rgba(255,107,107,0.2) !important; color: var(--accent1); }
+  .option-key {
+    width: 28px; height: 28px; border-radius: 8px; background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+  }
+  .result-msg {
+    display: none; text-align: center; padding: 12px;
+    border-radius: 12px; font-weight: 700; font-size: 1rem; margin-top: 12px;
+  }
+  .result-msg.show { display: block; }
+  .result-msg.correct { background: rgba(107,203,119,0.2); color: var(--accent3); }
+  .result-msg.wrong { background: rgba(255,107,107,0.2); color: var(--accent1); }
+
+  /* ===== SCREEN: RESULT ===== */
+  #screen-result { gap: 24px; text-align: center; }
+  .result-title { font-family: 'Fredoka One', cursive; font-size: 3rem; color: var(--accent2); }
+  .winner-card {
+    background: linear-gradient(135deg, #2d1b69, #1a0a2e);
+    border: 2px solid var(--accent5); border-radius: 24px;
+    padding: 28px 40px;
+  }
+  .winner-trophy { font-size: 4rem; margin-bottom: 8px; }
+  .winner-name { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: var(--accent2); }
+  .winner-pos { color: var(--accent5); font-weight: 700; }
+  .final-table { width: 100%; max-width: 400px; border-collapse: collapse; }
+  .final-table th { color: var(--text2); font-size: 0.8rem; text-transform: uppercase; padding: 8px; border-bottom: 1px solid var(--border); }
+  .final-table td { padding: 10px 8px; font-weight: 700; border-bottom: 1px solid var(--border); }
+  .final-table tr:last-child td { border-bottom: none; }
+
+  /* ===== SNAKE/LADDER LEGEND ===== */
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; }
+  .leg-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- SCREEN: HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-emoji">🎲</div>
+  <h1 class="home-title">Kuis Ular Tangga</h1>
+  <p class="home-sub">Buku Fiksi &amp; Nonfiksi — Bahasa Indonesia Kelas 7</p>
+  <div class="home-badges">
+    <span class="badge">📝 40 Soal Pilgan</span>
+    <span class="badge">👥 2–5 Kelompok</span>
+    <span class="badge">🏁 100 Kotak</span>
+    <span class="badge">⏱️ Timer 20 detik</span>
+  </div>
+  <button class="btn btn-primary" onclick="showScreen('screen-setup')">Mulai Game! 🚀</button>
+</div>
+
+<!-- SCREEN: SETUP -->
+<div class="screen" id="screen-setup">
+  <h2 class="setup-title">🎮 Setup Kelompok</h2>
+
+  <div class="setup-card">
+    <div class="setup-label">Jumlah Kelompok</div>
+    <div class="group-count-ctrl">
+      <button class="count-btn" onclick="changeCount(-1)">−</button>
+      <div class="count-val" id="count-val">3</div>
+      <button class="count-btn" onclick="changeCount(1)">+</button>
+    </div>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-label">Nama Kelompok</div>
+    <div class="group-inputs" id="group-inputs"></div>
+  </div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-secondary btn-sm" onclick="showScreen('screen-home')">← Kembali</button>
+    <button class="btn btn-primary" onclick="startGame()">Mulai! 🎯</button>
+  </div>
+</div>
+
+<!-- SCREEN: GAME -->
+<div class="screen" id="screen-game">
+  <div class="game-header">
+    <span class="game-header-title">🎲 Ular Tangga Kelas 7</span>
+    <div class="scoreboard" id="scoreboard"></div>
+  </div>
+  <div class="game-body">
+    <div class="board-wrap">
+      <div id="board"></div>
+    </div>
+    <div class="game-sidebar">
+      <div>
+        <div class="sidebar-section-title">Giliran</div>
+        <div class="turn-display" id="turn-display">
+          <div class="turn-label">Sekarang giliran</div>
+          <div class="turn-name" id="turn-name">—</div>
+        </div>
+      </div>
+      <div class="dice-area">
+        <div class="dice-face" id="dice-face">🎲</div>
+        <button class="btn btn-primary" id="roll-btn" onclick="rollDice()">Lempar Dadu 🎲</button>
+      </div>
+      <div>
+        <div class="sidebar-section-title" style="margin-bottom:8px">Info</div>
+        <div class="legend">
+          <div class="leg-item"><div class="leg-dot" style="background:var(--snake)"></div>Ular (turun)</div>
+          <div class="leg-item"><div class="leg-dot" style="background:var(--ladder)"></div>Tangga (naik)</div>
+        </div>
+      </div>
+      <div>
+        <div class="sidebar-section-title" style="margin-bottom:8px">Log</div>
+        <div class="log-area" id="log-area"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN: RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-title">🏆 Selesai!</div>
+  <div class="winner-card">
+    <div class="winner-trophy">🥇</div>
+    <div class="winner-name" id="winner-name">Kelompok A</div>
+    <div class="winner-pos" id="winner-pos">Kotak 100 — Pemenang!</div>
+  </div>
+  <table class="final-table" id="final-table">
+    <thead><tr><th>#</th><th>Kelompok</th><th>Benar</th><th>Posisi</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button class="btn btn-primary" onclick="resetGame()">Main Lagi 🔄</button>
+</div>
+
+<!-- MODAL: QUESTION -->
+<div class="modal-overlay" id="modal-q">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-badge" id="q-badge" style="background:rgba(77,150,255,0.2);color:var(--accent4)">Soal #1</div>
+      <div style="font-weight:700;color:var(--text2)" id="timer-count">20</div>
+    </div>
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+    <div class="q-text" id="q-text">Pertanyaan muncul di sini...</div>
+    <div class="options" id="options-wrap"></div>
+    <div class="result-msg" id="result-msg"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA: 40 SOAL PILIHAN GANDA =====
+const ALL_QUESTIONS = [
+  { q:"Teks yang berisi cerita rekaan atau imajinatif disebut...", opts:["Teks nonfiksi","Teks fiksi","Teks prosedur","Teks laporan"], ans:1 },
+  { q:"Contoh karya fiksi adalah...", opts:["Ensiklopedia","Novel","Kamus","Artikel ilmiah"], ans:1 },
+  { q:"Teks yang berisi fakta dan informasi nyata disebut...", opts:["Teks fiksi","Teks nonfiksi","Teks puisi","Teks drama"], ans:1 },
+  { q:"Buku biografi termasuk jenis buku...", opts:["Fiksi","Nonfiksi","Fiksi ilmiah","Antologi"], ans:1 },
+  { q:"Unsur pembangun cerita fiksi yang berkaitan dengan tempat dan waktu disebut...", opts:["Alur","Tema","Latar","Amanat"], ans:2 },
+  { q:"Rangkaian peristiwa dalam cerita disebut...", opts:["Tema","Alur/plot","Latar","Penokohan"], ans:1 },
+  { q:"Pesan moral yang ingin disampaikan pengarang disebut...", opts:["Tema","Alur","Latar","Amanat"], ans:3 },
+  { q:"Tokoh yang memiliki sifat baik dalam cerita disebut tokoh...", opts:["Antagonis","Tritagonis","Protagonis","Figuran"], ans:2 },
+  { q:"Tokoh yang memiliki sifat jahat dalam cerita disebut tokoh...", opts:["Protagonis","Antagonis","Tritagonis","Figuran"], ans:1 },
+  { q:"Sudut pandang orang pertama ditandai dengan penggunaan kata...", opts:["Dia/Ia","Kami/Kita","Aku/Saya","Mereka"], ans:2 },
+  { q:"Buku nonfiksi yang menceritakan riwayat hidup seseorang yang ditulis orang lain disebut...", opts:["Autobiografi","Biografi","Novel sejarah","Memoar"], ans:1 },
+  { q:"Buku yang menceritakan riwayat hidup seseorang yang ditulis oleh dirinya sendiri disebut...", opts:["Biografi","Ensiklopedia","Autobiografi","Memoar"], ans:2 },
+  { q:"Struktur awal cerita yang memperkenalkan tokoh dan latar disebut...", opts:["Klimaks","Resolusi","Orientasi","Komplikasi"], ans:2 },
+  { q:"Bagian puncak masalah dalam alur cerita disebut...", opts:["Orientasi","Komplikasi","Klimaks","Resolusi"], ans:2 },
+  { q:"Penyelesaian masalah dalam cerita disebut...", opts:["Orientasi","Klimaks","Komplikasi","Resolusi"], ans:3 },
+  { q:"Cerpen adalah singkatan dari...", opts:["Cerita Penuh","Cerita Pendek","Cerita Penting","Cerita Pengantar"], ans:1 },
+  { q:"Karya fiksi yang panjang dengan banyak tokoh dan alur disebut...", opts:["Cerpen","Puisi","Novel","Fabel"], ans:2 },
+  { q:"Fabel adalah cerita fiksi yang tokoh utamanya berupa...", opts:["Manusia","Hewan","Tumbuhan","Benda mati"], ans:1 },
+  { q:"Dongeng yang mengisahkan asal-usul suatu tempat atau benda disebut...", opts:["Fabel","Sage","Legenda","Mite"], ans:2 },
+  { q:"Buku pelajaran termasuk jenis buku...", opts:["Fiksi","Nonfiksi","Fiksi kreatif","Drama"], ans:1 },
+  { q:"Indeks dalam buku nonfiksi berfungsi untuk...", opts:["Menjelaskan isi buku","Mencari kata atau topik tertentu","Menulis daftar pustaka","Memberikan ringkasan"], ans:1 },
+  { q:"Bagian buku yang memuat daftar bab dan halamannya disebut...", opts:["Indeks","Glosarium","Daftar isi","Kata pengantar"], ans:2 },
+  { q:"Kumpulan definisi kata yang ada dalam buku disebut...", opts:["Indeks","Glosarium","Daftar isi","Bibliografi"], ans:1 },
+  { q:"Sumber rujukan yang digunakan penulis dalam buku disebut...", opts:["Glosarium","Indeks","Daftar pustaka","Kata pengantar"], ans:2 },
+  { q:"Teknik membaca cepat untuk menemukan informasi tertentu disebut...", opts:["Membaca nyaring","Membaca scanning","Membaca intensif","Membaca ekstensif"], ans:1 },
+  { q:"Membaca keseluruhan teks dengan cepat untuk mendapat gambaran umum disebut...", opts:["Scanning","Skimming","Membaca kritis","Membaca teliti"], ans:1 },
+  { q:"Unsur ekstrinsik karya sastra adalah unsur yang berasal dari...", opts:["Dalam karya itu sendiri","Luar karya sastra (kondisi sosial, biografi pengarang)","Tokoh dalam cerita","Alur cerita"], ans:1 },
+  { q:"Unsur intrinsik karya sastra adalah unsur yang berasal dari...", opts:["Luar karya","Dalam karya (tema, alur, tokoh, dll)","Biografi pengarang","Kondisi sosial"], ans:1 },
+  { q:"Perbandingan dua hal menggunakan kata 'seperti' atau 'bagai' disebut...", opts:["Metafora","Hiperbola","Simile/Perbandingan","Personifikasi"], ans:2 },
+  { q:"Gaya bahasa yang memberikan sifat manusia kepada benda mati disebut...", opts:["Simile","Metafora","Hiperbola","Personifikasi"], ans:3 },
+  { q:"Buku yang berisi kumpulan cerita pendek dari beberapa penulis disebut...", opts:["Novel","Antologi","Biografi","Ensiklopedia"], ans:1 },
+  { q:"Majalah dan koran termasuk jenis bacaan...", opts:["Fiksi","Nonfiksi","Fiksi ilmiah","Sastra"], ans:1 },
+  { q:"Bagian cerita yang berisi pengenalan tokoh dan suasana disebut...", opts:["Komplikasi","Resolusi","Orientasi","Klimaks"], ans:2 },
+  { q:"Kata 'antagonis' berasal dari bahasa Yunani yang berarti...", opts:["Musuh / lawan","Pahlawan","Pemimpin","Pendukung"], ans:0 },
+  { q:"Novel sejarah adalah jenis karya yang tergolong...", opts:["Nonfiksi murni","Fiksi berbasis fakta sejarah","Teks prosedur","Laporan ilmiah"], ans:1 },
+  { q:"Apa yang dimaksud dengan tema dalam cerita fiksi?", opts:["Urutan kejadian","Pokok pikiran/ide utama cerita","Tempat terjadinya cerita","Tokoh utama cerita"], ans:1 },
+  { q:"Karya nonfiksi harus bersifat...", opts:["Imajinatif dan rekaan","Faktual dan berdasarkan kenyataan","Penuh simbol","Menghibur saja"], ans:1 },
+  { q:"Sudut pandang orang ketiga menggunakan kata...", opts:["Aku","Saya","Kami","Dia/Ia/Mereka"], ans:3 },
+  { q:"Perbedaan utama antara cerpen dan novel adalah...", opts:["Cerpen memiliki lebih banyak tokoh","Novel lebih pendek dari cerpen","Cerpen lebih singkat, novel lebih panjang dan kompleks","Cerpen selalu tentang hewan"], ans:2 },
+  { q:"Tujuan utama membaca buku nonfiksi adalah untuk...", opts:["Hiburan semata","Mendapatkan informasi dan pengetahuan","Menikmati cerita rekaan","Melatih imajinasi"], ans:1 },
+];
+
+// ===== SNAKE & LADDER =====
+const SNAKES  = { 99:21, 87:24, 74:53, 62:19, 56:7, 49:11, 17:4 };
+const LADDERS = { 2:38, 7:14, 8:31, 15:26, 21:42, 28:84, 36:44, 51:67, 71:91 };
+
+const PAWN_COLORS = ['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#c77dff'];
+const DICE_FACES = ['⚀','⚁','⚂','⚃','⚄','⚅'];
+
+// ===== STATE =====
+let groups = [];
+let currentTurn = 0;
+let questions = [];
+let usedQIdx = 0;
+let timerInterval = null;
+let timerSec = 20;
+let pendingMove = 0;
+let answered = false;
+
+// ===== UTILS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ===== SETUP =====
+let groupCount = 3;
+function changeCount(delta) {
+  groupCount = Math.max(2, Math.min(5, groupCount + delta));
+  document.getElementById('count-val').textContent = groupCount;
+  renderGroupInputs();
+}
+function renderGroupInputs() {
+  const wrap = document.getElementById('group-inputs');
+  const existing = [...wrap.querySelectorAll('.group-input')].map(i => i.value);
+  wrap.innerHTML = '';
+  for (let i = 0; i < groupCount; i++) {
+    const inp = document.createElement('input');
+    inp.className = 'group-input';
+    inp.placeholder = `Kelompok ${String.fromCharCode(65+i)}`;
+    inp.value = existing[i] || '';
+    wrap.appendChild(inp);
+  }
+}
+renderGroupInputs();
+
+function startGame() {
+  const inputs = document.querySelectorAll('.group-input');
+  groups = [];
+  inputs.forEach((inp, i) => {
+    groups.push({
+      name: inp.value.trim() || `Kelompok ${String.fromCharCode(65+i)}`,
+      pos: 1, correct: 0, color: PAWN_COLORS[i]
+    });
+  });
+  // Shuffle questions
+  questions = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
+  usedQIdx = 0;
+  currentTurn = 0;
+  buildBoard();
+  renderScoreboard();
+  updateTurnDisplay();
+  document.getElementById('log-area').innerHTML = '<div class="log-item">Game dimulai! Selamat bermain 🎉</div>';
+  document.getElementById('dice-face').textContent = '🎲';
+  document.getElementById('roll-btn').disabled = false;
+  showScreen('screen-game');
+}
+
+// ===== BOARD =====
+function buildBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  // Board layout: row 10 (top) to row 1 (bottom), snaking
+  const cells = [];
+  for (let row = 9; row >= 0; row--) {
+    const rowNums = [];
+    for (let col = 0; col < 10; col++) {
+      rowNums.push(row * 10 + col + 1);
+    }
+    // Even rows from bottom go left-to-right; odd go right-to-left
+    const fromBottom = 9 - row;
+    if (fromBottom % 2 === 1) rowNums.reverse();
+    cells.push(...rowNums);
+  }
+  cells.forEach(num => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.id = `cell-${num}`;
+    const numEl = document.createElement('div');
+    numEl.className = 'cell-num';
+    numEl.textContent = num;
+    cell.appendChild(numEl);
+    if (SNAKES[num])  { cell.classList.add('snake-head'); cell.innerHTML += '<span class="cell-icon">🐍</span>'; }
+    if (LADDERS[num]) { cell.classList.add('ladder-bottom'); cell.innerHTML += '<span class="cell-icon">🪜</span>'; }
+    if (Object.values(SNAKES).includes(num))  cell.classList.add('snake-tail');
+    if (Object.values(LADDERS).includes(num)) cell.classList.add('ladder-top');
+    if (num === 100) cell.innerHTML += '<span class="cell-icon">🏆</span>';
+    const pawnsDiv = document.createElement('div');
+    pawnsDiv.className = 'pawns';
+    pawnsDiv.id = `pawns-${num}`;
+    cell.appendChild(pawnsDiv);
+    board.appendChild(cell);
+  });
+  renderPawns();
+}
+
+function renderPawns() {
+  document.querySelectorAll('.pawns').forEach(p => p.innerHTML = '');
+  groups.forEach((g, i) => {
+    const slot = document.getElementById(`pawns-${g.pos}`);
+    if (slot) {
+      const pawn = document.createElement('div');
+      pawn.className = 'pawn';
+      pawn.style.background = g.color;
+      pawn.title = g.name;
+      slot.appendChild(pawn);
+    }
+  });
+}
+
+function renderScoreboard() {
+  const sb = document.getElementById('scoreboard');
+  sb.innerHTML = '';
+  groups.forEach((g, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'score-chip';
+    chip.style.background = g.color + '33';
+    chip.style.border = `1.5px solid ${g.color}`;
+    chip.innerHTML = `<span style="color:${g.color}">●</span> ${g.name}: Kotak ${g.pos} | ✓${g.correct}`;
+    sb.appendChild(chip);
+  });
+}
+
+function updateTurnDisplay() {
+  const g = groups[currentTurn];
+  const el = document.getElementById('turn-name');
+  el.textContent = g.name;
+  el.style.color = g.color;
+}
+
+// ===== DICE =====
+function rollDice() {
+  document.getElementById('roll-btn').disabled = true;
+  const dice = document.getElementById('dice-face');
+  dice.classList.add('rolling');
+  let spins = 0;
+  const spin = setInterval(() => {
+    dice.textContent = DICE_FACES[Math.floor(Math.random()*6)];
+    spins++;
+    if (spins >= 8) {
+      clearInterval(spin);
+      dice.classList.remove('rolling');
+      const val = Math.floor(Math.random()*6)+1;
+      dice.textContent = DICE_FACES[val-1];
+      afterRoll(val);
+    }
+  }, 80);
+}
+
+function afterRoll(val) {
+  const g = groups[currentTurn];
+  addLog(`<span style="color:${g.color}">${g.name}</span> dapat angka <b>${val}</b>`);
+  const newPos = Math.min(g.pos + val, 100);
+  if (newPos === 100) {
+    g.pos = 100;
+    renderPawns();
+    renderScoreboard();
+    showResult();
+    return;
+  }
+  pendingMove = newPos;
+  showQuestion();
+}
+
+// ===== QUESTION =====
+function showQuestion() {
+  if (usedQIdx >= questions.length) {
+    usedQIdx = 0;
+    questions = [...ALL_QUESTIONS].sort(() => Math.random() - 0.5);
+  }
+  const qData = questions[usedQIdx++];
+  answered = false;
+
+  document.getElementById('q-badge').textContent = `Soal #${usedQIdx}`;
+  document.getElementById('q-text').textContent = qData.q;
+  
+  const wrap = document.getElementById('options-wrap');
+  wrap.innerHTML = '';
+  qData.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<div class="option-key">${['A','B','C','D'][i]}</div>${opt}`;
+    btn.onclick = () => answerQuestion(i, qData.ans, btn, wrap);
+    wrap.appendChild(btn);
+  });
+
+  document.getElementById('result-msg').className = 'result-msg';
+  document.getElementById('modal-q').classList.add('active');
+
+  // Timer
+  timerSec = 20;
+  document.getElementById('timer-count').textContent = timerSec;
+  document.getElementById('timer-bar').style.width = '100%';
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    timerSec--;
+    document.getElementById('timer-count').textContent = timerSec;
+    document.getElementById('timer-bar').style.width = (timerSec/20*100) + '%';
+    if (timerSec <= 0) {
+      clearInterval(timerInterval);
+      if (!answered) timeUp(qData.ans, wrap);
+    }
+  }, 1000);
+}
+
+function answerQuestion(chosen, correct, btn, wrap) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+
+  const isCorrect = chosen === correct;
+  [...wrap.children].forEach((b, i) => {
+    if (i === correct) b.classList.add('correct');
+    else if (i === chosen && !isCorrect) b.classList.add('wrong');
+  });
+
+  const msg = document.getElementById('result-msg');
+  if (isCorrect) {
+    msg.className = 'result-msg show correct';
+    msg.textContent = '✅ Benar! Maju ke kotak tujuan.';
+    groups[currentTurn].correct++;
+    moveGroup(pendingMove);
+  } else {
+    msg.className = 'result-msg show wrong';
+    msg.textContent = '❌ Salah! Tetap di tempat.';
+    addLog(`<span style="color:${groups[currentTurn].color}">${groups[currentTurn].name}</span> menjawab salah, tetap di kotak ${groups[currentTurn].pos}`);
+  }
+
+  setTimeout(() => closeModal(), 2000);
+}
+
+function timeUp(correct, wrap) {
+  answered = true;
+  document.querySelectorAll('.option-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === correct) b.classList.add('correct');
+  });
+  const msg = document.getElementById('result-msg');
+  msg.className = 'result-msg show wrong';
+  msg.textContent = '⏰ Waktu habis! Tetap di tempat.';
+  addLog(`<span style="color:${groups[currentTurn].color}">${groups[currentTurn].name}</span> kehabisan waktu, tetap di kotak ${groups[currentTurn].pos}`);
+  setTimeout(() => closeModal(), 2000);
+}
+
+function closeModal() {
+  document.getElementById('modal-q').classList.remove('active');
+  nextTurn();
+}
+
+function moveGroup(pos) {
+  const g = groups[currentTurn];
+  g.pos = pos;
+  addLog(`<span style="color:${g.color}">${g.name}</span> maju ke kotak ${pos}`);
+  // Check snake/ladder
+  if (SNAKES[pos]) {
+    const to = SNAKES[pos];
+    addLog(`🐍 <span style="color:var(--snake)">Ular!</span> ${g.name} turun ke kotak ${to}`);
+    setTimeout(() => { g.pos = to; renderPawns(); renderScoreboard(); }, 500);
+  } else if (LADDERS[pos]) {
+    const to = LADDERS[pos];
+    addLog(`🪜 <span style="color:var(--ladder)">Tangga!</span> ${g.name} naik ke kotak ${to}`);
+    setTimeout(() => { g.pos = to; renderPawns(); renderScoreboard(); }, 500);
+  }
+  renderPawns();
+  renderScoreboard();
+}
+
+function nextTurn() {
+  currentTurn = (currentTurn + 1) % groups.length;
+  updateTurnDisplay();
+  document.getElementById('roll-btn').disabled = false;
+}
+
+// ===== LOG =====
+function addLog(html) {
+  const log = document.getElementById('log-area');
+  const item = document.createElement('div');
+  item.className = 'log-item';
+  item.innerHTML = html;
+  log.appendChild(item);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ===== RESULT =====
+function showResult() {
+  clearInterval(timerInterval);
+  document.getElementById('modal-q').classList.remove('active');
+  
+  const winner = groups.find(g => g.pos === 100);
+  document.getElementById('winner-name').textContent = winner ? winner.name : 'Game Selesai';
+  document.getElementById('winner-pos').textContent = winner ? `Kotak 100 — Pemenang! 🎉` : '';
+
+  const sorted = [...groups].sort((a,b) => b.pos - a.pos || b.correct - a.correct);
+  const tbody = document.querySelector('#final-table tbody');
+  tbody.innerHTML = '';
+  sorted.forEach((g, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:${g.color};font-weight:800">${['🥇','🥈','🥉','4️⃣','5️⃣'][i]}</td>
+      <td style="color:${g.color};font-weight:800">${g.name}</td>
+      <td>${g.correct}</td>
+      <td>${g.pos}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  showScreen('screen-result');
+}
+
+function resetGame() {
+  clearInterval(timerInterval);
+  document.getElementById('modal-q').classList.remove('active');
+  showScreen('screen-home');
+}
+</script>
+</body>
+</html>
