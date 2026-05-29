@@ -201,7 +201,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <h1 class="intro-title">Kuis Ular Tangga</h1>
   <p class="intro-sub">Buku Fiksi &amp; Nonfiksi — Bahasa Indonesia</p>
   <div class="intro-chips">
-    <div class="chip"><span>📝</span> 40 soal variatif</div>
+    <div class="chip"><span>📝</span> 40 soal merata</div>
     <div class="chip"><span>🔄</span> Realtime sync</div>
     <div class="chip"><span>👥</span> 2–5 kelompok</div>
     <div class="chip"><span>⏱️</span> Timer per soal</div>
@@ -398,6 +398,24 @@ let qCells_fill = [], qCells_challenge = [];
 let pendingCell = 0;
 let playerCount = 3;
 
+// ===== QUESTION QUEUE HELPER =====
+// Membagi soal secara merata per kelompok
+// Returns: { fillQueues: [[qi,...],[qi,...],...], challengeQueues: [[qi,...],[qi,...],...] }
+function buildPerGroupQueues(numPlayers) {
+  const fillIdx = QUESTIONS.map((q,i)=>q.type==='fill'?i:-1).filter(i=>i>=0);
+  const challengeIdx = QUESTIONS.map((q,i)=>q.type==='challenge'?i:-1).filter(i=>i>=0);
+  // Shuffle both pools
+  const shuffled = arr => arr.map(v=>({v,r:Math.random()})).sort((a,b)=>a.r-b.r).map(x=>x.v);
+  const fills = shuffled(fillIdx);
+  const challenges = shuffled(challengeIdx);
+  // Distribute evenly — round-robin assignment
+  const fillQueues = Array.from({length:numPlayers}, ()=>[]);
+  const challengeQueues = Array.from({length:numPlayers}, ()=>[]);
+  fills.forEach((qi,i) => fillQueues[i % numPlayers].push(qi));
+  challenges.forEach((qi,i) => challengeQueues[i % numPlayers].push(qi));
+  return { fillQueues, challengeQueues };
+}
+
 // ===== INIT =====
 // Hide loading overlay after Firebase connects (or timeout 3s)
 {
@@ -443,8 +461,10 @@ function startGameAsGuru(){
   allQ.forEach((c,i)=>i%2===0?qCells_fill.push(c):qCells_challenge.push(c));
   for(let i=0;i<playerCount;i++){
     const n=document.getElementById('pn-'+i)?.value.trim()||`Kelompok ${i+1}`;
-    players.push({name:n,color:COLORS[i],avatar:AVATARS[i],pos:0,benar:0,salah:0});
+    players.push({name:n,color:COLORS[i],avatar:AVATARS[i],pos:0,benar:0,salah:0,fillPtr:0,challengePtr:0});
   }
+  // Buat antrian soal per kelompok yang merata
+  const { fillQueues, challengeQueues } = buildPerGroupQueues(playerCount);
   const initState = {
     status:'playing',
     players,
@@ -452,6 +472,8 @@ function startGameAsGuru(){
     gameOver:false,
     qCells_fill,
     qCells_challenge,
+    fillQueues,      // antrian soal fill per kelompok [kelompok][urutan]
+    challengeQueues, // antrian soal challenge per kelompok [kelompok][urutan]
     usedQ:[],
     diceResult:0,
     rollMsg:'Klik lempar dadu',
@@ -602,9 +624,32 @@ function rollDice(){
     gameRef.set(gs);
   } else if(isFill||isChallenge){
     gs.pendingCell=np;
-    const pool=QUESTIONS.map((_,i)=>i).filter(i=>!usedQ.has(i)&&QUESTIONS[i].type===(isChallenge?'challenge':'fill'));
-    let pool2=pool.length?pool:QUESTIONS.map((_,i)=>i).filter(i=>QUESTIONS[i].type===(isChallenge?'challenge':'fill'));
-    const qi=pool2[Math.floor(Math.random()*pool2.length)];
+    const pIdx = gs.currentPlayer;
+    // Ambil soal dari antrian kelompok yang bersangkutan
+    let qi;
+    if(isChallenge){
+      const queue = (gs.challengeQueues && gs.challengeQueues[pIdx]) || [];
+      const ptr = gs.players[pIdx].challengePtr || 0;
+      if(queue.length > 0){
+        qi = queue[ptr % queue.length];
+        gs.players[pIdx].challengePtr = (ptr + 1);
+      } else {
+        // fallback: random jika queue kosong
+        const pool = QUESTIONS.map((_,i)=>i).filter(i=>QUESTIONS[i].type==='challenge');
+        qi = pool[Math.floor(Math.random()*pool.length)];
+      }
+    } else {
+      const queue = (gs.fillQueues && gs.fillQueues[pIdx]) || [];
+      const ptr = gs.players[pIdx].fillPtr || 0;
+      if(queue.length > 0){
+        qi = queue[ptr % queue.length];
+        gs.players[pIdx].fillPtr = (ptr + 1);
+      } else {
+        // fallback: random jika queue kosong
+        const pool = QUESTIONS.map((_,i)=>i).filter(i=>QUESTIONS[i].type==='fill');
+        qi = pool[Math.floor(Math.random()*pool.length)];
+      }
+    }
     const newUsed=[...usedQ,qi];
     gs.usedQ=newUsed;
     gs.question={qi,type:isChallenge?'challenge':'fill'};
@@ -637,7 +682,19 @@ function showQFromState(qInfo, gs){
   const badge=document.getElementById('q-type-badge');
   if(q.type==='fill'){badge.textContent='✍️ Isian Singkat';badge.className='q-type-badge type-fill';}
   else{badge.textContent='⚡ Tantangan';badge.className='q-type-badge type-challenge';}
-  document.getElementById('q-num').textContent=`Soal — ${q.kat}`;
+  // Tampilkan nomor soal kelompok ini
+  const pIdx = gs.currentPlayer;
+  let qNum = '';
+  if(q.type === 'fill'){
+    const ptr = Math.max(1, gs.players[pIdx].fillPtr || 1);
+    const total = (gs.fillQueues && gs.fillQueues[pIdx]) ? gs.fillQueues[pIdx].length : '?';
+    qNum = ` | Isian ke-${ptr} dari ${total}`;
+  } else {
+    const ptr = Math.max(1, gs.players[pIdx].challengePtr || 1);
+    const total = (gs.challengeQueues && gs.challengeQueues[pIdx]) ? gs.challengeQueues[pIdx].length : '?';
+    qNum = ` | Tantangan ke-${ptr} dari ${total}`;
+  }
+  document.getElementById('q-num').textContent=`Soal — ${q.kat}${qNum}`;
   document.getElementById('q-text').textContent=q.q;
   document.getElementById('q-feedback').textContent='';
   document.getElementById('q-feedback').className='q-feedback';
