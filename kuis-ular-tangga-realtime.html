@@ -233,6 +233,9 @@ textarea{resize:vertical;min-height:88px;}
 </head>
 <body>
 
+<!-- MUTE BUTTON (always visible) -->
+<button id="muteBtn" onclick="toggleMute()" title="Mute/Unmute" style="position:fixed;top:12px;right:12px;z-index:500;background:rgba(20,34,51,.9);border:1px solid var(--bd);border-radius:50%;width:38px;height:38px;font-size:1.05rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);box-shadow:0 2px 12px rgba(0,0,0,.4);">🔊</button>
+
 <!-- LANDING -->
 <div id="landing" class="screen on">
   <div style="font-size:3.5rem;margin-bottom:6px;">🎲🐍🪜</div>
@@ -714,6 +717,9 @@ function mulaiGame() {
   GS.answeredTotal = 0;
   push();
   ss('guruGame');
+  initAudio();
+  resumeAC();
+  startBGM();
   setTimeout(()=>{ initCanvas(); renderBoard(); updateGuruPanel(); }, 50);
 }
 
@@ -970,11 +976,17 @@ function processResults() {
     if (a.correct && gii===fastestGi && correctOnes.length>1) delta += BONUS_CEPAT;
     let newPos = Math.max(1, Math.min(TOTAL_CELLS, g.pos + delta));
     g.pos = newPos;
-    if (SNAKES[newPos])  { g.pos=SNAKES[newPos]; }
-    else if (LADDERS[newPos]) { g.pos=LADDERS[newPos]; }
+    let hadSpecial = false;
+    if (SNAKES[newPos])  { g.pos=SNAKES[newPos]; hadSpecial='snake'; }
+    else if (LADDERS[newPos]) { g.pos=LADDERS[newPos]; hadSpecial='ladder'; }
     if (g.pos >= TOTAL_CELLS) { g.pos=TOTAL_CELLS; GS.winner=gii; }
     // Advance group cursor
     g.cursor = (g.cursor||0) + 1;
+    // Sound (only for the viewing client)
+    if (a.correct) setTimeout(()=>sfxBenar(), 200);
+    else setTimeout(()=>sfxSalah(), 200);
+    if (hadSpecial==='snake')  setTimeout(()=>sfxUlar(),   700);
+    if (hadSpecial==='ladder') setTimeout(()=>sfxTangga(), 700);
   });
 
   GS.answeredTotal = (GS.answeredTotal||0) + 1;
@@ -1065,6 +1077,7 @@ function lemparSoal() {
   GS.results = null;
   GS.soalIdx = round + 1;
   push();
+  sfxLempar();
   updateGuruPanel();
 
   // After timerMax, auto-process
@@ -1114,6 +1127,9 @@ function pilihKelompok(idx) {
   const g = GS.groups[idx]||{name:GROUP_DEF[idx],pos:1};
   document.getElementById('mTopTitle').textContent = `📱 ${g.name}`;
   document.getElementById('mPosTag').textContent = `Kotak ${g.pos}`;
+  initAudio();
+  resumeAC();
+  startBGM();
   ss('muridGame');
   updateMuridView();
   // Listen for changes
@@ -1178,6 +1194,9 @@ function updateMuridView() {
     document.getElementById('mRSub').textContent = correct ? `+${bobot} kotak naik! 🚀` : `−${DENDA} kotak turun 😓`;
     document.getElementById('mNewPos').textContent = `📍 Kotak ${g.pos}`;
     clearInterval(muridTimerIv);
+    // Play snake/ladder sound if applicable
+    if (SNAKES[g.pos+(correct?bobot:-DENDA)] || Object.values(SNAKES).includes(g.pos)) sfxUlar();
+    else if (LADDERS[g.pos-(correct?bobot:-DENDA)] || Object.values(LADDERS).includes(g.pos)) sfxTangga();
     return;
   }
 
@@ -1265,6 +1284,8 @@ function pilihJawaban(idx) {
   });
 
   const correct = idx === mySoal.ans;
+  // Immediate sound feedback on murid device
+  if (correct) sfxBenar(); else sfxSalah();
   setTimeout(()=>{
     submitAnswer(String(idx), correct, false);
     muridAnswering = false;
@@ -1341,6 +1362,7 @@ function showWinner() {
       <div class="fp">Kotak ${g.pos}</div>
     </div>`).join('');
   ss('winnerScreen');
+  sfxMenang();
 }
 
 // ═══════════════════════════
@@ -1359,11 +1381,185 @@ function toast(msg,type='info'){
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 // ═══════════════════════════
+//  AUDIO ENGINE
+// ═══════════════════════════
+let AC = null, bgmGain = null, sfxGain = null, bgmNode = null, muted = false;
+
+function initAudio() {
+  try {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    bgmGain = AC.createGain(); bgmGain.gain.value = 0.22; bgmGain.connect(AC.destination);
+    sfxGain = AC.createGain(); sfxGain.gain.value = 0.7;  sfxGain.connect(AC.destination);
+  } catch(e) { console.warn('Audio not supported'); }
+}
+
+function resumeAC() {
+  if (AC && AC.state === 'suspended') AC.resume();
+}
+
+// ── Tone helper ──
+function playTone(freq, type, dur, gain, startDelay=0, dest=null) {
+  if (!AC || muted) return;
+  const d = dest || sfxGain;
+  const osc = AC.createOscillator();
+  const g   = AC.createGain();
+  osc.type = type; osc.frequency.setValueAtTime(freq, AC.currentTime + startDelay);
+  g.gain.setValueAtTime(gain, AC.currentTime + startDelay);
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + startDelay + dur);
+  osc.connect(g); g.connect(d);
+  osc.start(AC.currentTime + startDelay);
+  osc.stop(AC.currentTime + startDelay + dur + 0.01);
+}
+
+function playNoise(dur, gainVal, startDelay=0) {
+  if (!AC || muted) return;
+  const buf = AC.createBuffer(1, AC.sampleRate * dur, AC.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const src = AC.createBufferSource();
+  src.buffer = buf;
+  const g = AC.createGain();
+  g.gain.setValueAtTime(gainVal, AC.currentTime + startDelay);
+  g.gain.exponentialRampToValueAtTime(0.001, AC.currentTime + startDelay + dur);
+  const filter = AC.createBiquadFilter();
+  filter.type = 'bandpass'; filter.frequency.value = 800;
+  src.connect(filter); filter.connect(g); g.connect(sfxGain);
+  src.start(AC.currentTime + startDelay);
+  src.stop(AC.currentTime + startDelay + dur + 0.01);
+}
+
+// ── Sound effects ──
+function sfxBenar() {
+  // Happy ascending arpeggio
+  const notes = [523, 659, 784, 1047];
+  notes.forEach((f, i) => playTone(f, 'sine', 0.25, 0.5, i * 0.1));
+  // Sparkle layer
+  [1200, 1600, 2000].forEach((f, i) => playTone(f, 'sine', 0.15, 0.2, i * 0.08));
+}
+
+function sfxSalah() {
+  // Low sad descending
+  playTone(300, 'sawtooth', 0.18, 0.4, 0);
+  playTone(220, 'sawtooth', 0.25, 0.4, 0.15);
+  playTone(150, 'square',   0.3,  0.3, 0.32);
+}
+
+function sfxUlar() {
+  // Slithery descending chromatic + hiss
+  const steps = [600,550,500,450,380,320,260];
+  steps.forEach((f, i) => playTone(f, 'sawtooth', 0.12, 0.35, i * 0.07));
+  playNoise(0.5, 0.15, 0);
+}
+
+function sfxTangga() {
+  // Bouncy ascending jumps
+  const notes = [330, 415, 523, 622, 784, 932, 1047];
+  notes.forEach((f, i) => playTone(f, 'triangle', 0.15, 0.45, i * 0.075));
+  // Bell shimmer
+  [1568, 1976].forEach((f, i) => playTone(f, 'sine', 0.2, 0.25, i * 0.15));
+}
+
+function sfxMenang() {
+  // Fanfare melody: C-E-G-C + drum roll feel
+  const melody = [
+    [523,0],[659,0.12],[784,0.24],[1047,0.38],[784,0.54],[1047,0.66],[1319,0.8]
+  ];
+  melody.forEach(([f,t]) => playTone(f, 'square', 0.3, 0.4, t));
+  // Harmony layer
+  const harm = [[659,0.38],[784,0.54],[988,0.66],[1319,0.8]];
+  harm.forEach(([f,t]) => playTone(f, 'triangle', 0.2, 0.25, t));
+  // Noise burst at start
+  playNoise(0.08, 0.3, 0);
+  playNoise(0.08, 0.25, 0.38);
+  playNoise(0.08, 0.3, 0.8);
+}
+
+function sfxLempar() {
+  // Woosh + tick
+  playTone(800, 'sine', 0.06, 0.3, 0);
+  playTone(1200,'sine', 0.04, 0.25, 0.06);
+  playNoise(0.08, 0.2, 0);
+}
+
+// ── BGM: procedural chiptune loop ──
+function startBGM() {
+  if (!AC || muted) return;
+  stopBGM();
+
+  // Build a short looping melody pattern
+  // C major pentatonic: C4 E4 G4 A4 C5
+  const scale = [261.63, 329.63, 392.00, 440.00, 523.25, 659.25, 784.00];
+  const pattern = [0,2,4,3,2,4,5,4,3,2,0,1,2,4,6,5]; // indices into scale
+  const BPM = 128, beat = 60/BPM;
+
+  // Use ScriptProcessor-free approach: schedule notes ahead using setTimeout loop
+  let step = 0, loopRunning = true;
+  bgmNode = { stop: () => { loopRunning = false; } };
+
+  const scheduleNote = () => {
+    if (!loopRunning || muted) return;
+    const idx  = pattern[step % pattern.length];
+    const freq = scale[idx];
+    const isAccent = step % 4 === 0;
+
+    // Lead melody
+    playTone(freq, 'square', beat * 0.7, isAccent ? 0.3 : 0.18, 0, bgmGain);
+    // Bass (octave lower every 4 beats)
+    if (step % 4 === 0) {
+      playTone(scale[idx] / 2, 'triangle', beat * 1.8, 0.15, 0, bgmGain);
+    }
+    // Hi-hat noise tick
+    if (!muted) {
+      const buf = AC.createBuffer(1, AC.sampleRate * 0.04, AC.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * (1 - i/d.length);
+      const src = AC.createBufferSource(); src.buffer = buf;
+      const g = AC.createGain(); g.gain.value = step % 2 === 0 ? 0.06 : 0.03;
+      const f = AC.createBiquadFilter(); f.type='highpass'; f.frequency.value=4000;
+      src.connect(f); f.connect(g); g.connect(bgmGain);
+      src.start(AC.currentTime); src.stop(AC.currentTime + 0.05);
+    }
+
+    step++;
+    if (loopRunning) setTimeout(scheduleNote, beat * 1000);
+  };
+
+  scheduleNote();
+}
+
+function stopBGM() {
+  if (bgmNode) { bgmNode.stop(); bgmNode = null; }
+}
+
+function toggleMute() {
+  muted = !muted;
+  const btn = document.getElementById('muteBtn');
+  if (muted) {
+    stopBGM();
+    if (btn) btn.textContent = '🔇';
+  } else {
+    resumeAC();
+    startBGM();
+    if (btn) btn.textContent = '🔊';
+  }
+}
+
+// ═══════════════════════════
 //  INIT
 // ═══════════════════════════
 window.addEventListener('load', ()=>{
   initFirebase();
   document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
+
+  // Start audio on first interaction
+  const startAudioOnce = () => {
+    resumeAC();
+    startBGM();
+    document.removeEventListener('click', startAudioOnce);
+    document.removeEventListener('touchstart', startAudioOnce);
+  };
+  document.addEventListener('click', startAudioOnce);
+  document.addEventListener('touchstart', startAudioOnce);
 });
 window.addEventListener('resize',()=>{
   if(document.getElementById('guruGame').classList.contains('on')){initCanvas();renderBoard();}
