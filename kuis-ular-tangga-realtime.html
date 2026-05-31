@@ -4,858 +4,446 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Ular Tangga Kuis — Bahasa Indonesia Kelas 7</title>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-<!-- QR Code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
+:root{
+  --bg:#0d1b2a;--s1:#142233;--s2:#1a2d45;--s3:#213554;
+  --y:#ffd166;--g:#06d6a0;--r:#ef476f;--b:#118ab2;--p:#9b5de5;
+  --tx:#e8f4fd;--tx2:#7fa8cc;--bd:#1e3a5a;--r14:14px;--r24:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;}
+.screen{display:none;}
+.screen.on{display:flex;flex-direction:column;min-height:100vh;animation:fu .3s ease;}
+@keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 
-:root {
-  --bg: #0d1b2a;
-  --s1: #142233;
-  --s2: #1a2d45;
-  --s3: #213554;
-  --accent: #ffd166;
-  --green: #06d6a0;
-  --red: #ef476f;
-  --blue: #118ab2;
-  --purple: #9b5de5;
-  --text: #e8f4fd;
-  --text2: #7fa8cc;
-  --border: #1e3a5a;
-  --r: 16px;
-  --rr: 24px;
-}
+/* LANDING */
+#landing{align-items:center;justify-content:center;text-align:center;padding:32px 20px;
+  background:radial-gradient(ellipse at 60% 20%,rgba(17,138,178,.18) 0%,transparent 60%),
+             radial-gradient(ellipse at 20% 80%,rgba(155,93,229,.12) 0%,transparent 50%),var(--bg);}
+.logo-title{font-family:'Fredoka One',cursive;font-size:clamp(2rem,7vw,3.2rem);color:var(--y);
+  text-shadow:0 0 40px rgba(255,209,102,.3);margin:8px 0 4px;}
+.logo-sub{color:var(--tx2);font-size:.9rem;margin-bottom:36px;}
+.mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:460px;width:100%;}
+@media(max-width:380px){.mode-cards{grid-template-columns:1fr;}}
+.mode-card{background:var(--s2);border:2px solid var(--bd);border-radius:var(--r24);padding:26px 18px;
+  cursor:pointer;text-align:center;transition:border-color .2s,transform .15s,background .2s;}
+.mode-card:hover{border-color:var(--y);background:var(--s3);transform:translateY(-3px);}
+.mode-card .icon{font-size:2.6rem;margin-bottom:8px;}
+.mode-card h3{font-size:1.05rem;font-weight:800;margin-bottom:3px;}
+.mode-card p{font-size:.75rem;color:var(--tx2);line-height:1.4;}
+.mode-card.gc{border-color:rgba(255,209,102,.25);}
+.mode-card.mc{border-color:rgba(6,214,160,.25);}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* GENERAL */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r14);padding:18px;}
+.card+.card{margin-top:10px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 26px;
+  border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:.95rem;
+  cursor:pointer;transition:transform .12s,box-shadow .12s,opacity .15s;white-space:nowrap;}
+.btn:active{transform:scale(.95);}
+.btn:disabled{opacity:.38;cursor:not-allowed !important;transform:none !important;}
+.by{background:var(--y);color:#111;box-shadow:0 4px 16px rgba(255,209,102,.28);}
+.by:hover:not(:disabled){box-shadow:0 6px 22px rgba(255,209,102,.45);transform:translateY(-1px);}
+.bg{background:var(--g);color:#111;}
+.br{background:var(--r);color:#fff;}
+.bb{background:var(--b);color:#fff;}
+.bgh{background:var(--s3);color:var(--tx);border:1px solid var(--bd);}
+.bgh:hover:not(:disabled){background:var(--bd);}
+.bsm{padding:9px 16px;font-size:.82rem;}
+.bfw{width:100%;}
+input[type=text],input[type=password],textarea{width:100%;background:var(--s2);border:2px solid var(--bd);
+  border-radius:11px;padding:11px 15px;color:var(--tx);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s;}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:var(--y);}
+textarea{resize:vertical;min-height:88px;}
+.slbl{font-size:.68rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--tx2);margin-bottom:7px;}
+.topbar{display:flex;align-items:center;gap:10px;padding:11px 15px;background:var(--s1);
+  border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:50;}
+.topbar .ttl{font-family:'Fredoka One',cursive;font-size:1.1rem;color:var(--y);flex:1;}
+.bk{background:none;border:none;color:var(--tx2);cursor:pointer;font-size:1.3rem;padding:4px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);
+  z-index:100;align-items:center;justify-content:center;padding:18px;}
+.overlay.open{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r24);padding:26px;
+  max-width:340px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.6);}
+.modal h3{font-family:'Fredoka One',cursive;font-size:1.35rem;color:var(--y);margin-bottom:14px;}
+.mbtns{display:flex;gap:9px;margin-top:14px;}
 
-body {
-  font-family: 'Nunito', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
+/* SETUP */
+#guruSetup{padding:0 15px 28px;}
+.grow{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.gdot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.rchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;}
+.rc{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:18px;font-size:.78rem;font-weight:700;}
+.rcg{background:rgba(6,214,160,.14);color:var(--g);border:1px solid rgba(6,214,160,.28);}
+.rcb{background:rgba(239,71,111,.13);color:var(--r);border:1px solid rgba(239,71,111,.26);}
+.rcm{background:rgba(155,93,229,.14);color:var(--p);border:1px solid rgba(155,93,229,.28);}
+.rcy{background:rgba(255,209,102,.14);color:var(--y);border:1px solid rgba(255,209,102,.28);}
+.stw{overflow-x:auto;border-radius:11px;border:1px solid var(--bd);}
+.st{width:100%;border-collapse:collapse;font-size:.8rem;}
+.st th{background:var(--s3);color:var(--tx2);font-weight:700;padding:9px 11px;text-align:left;}
+.st td{padding:8px 11px;border-top:1px solid var(--bd);vertical-align:top;}
+.st tr:hover td{background:var(--s2);}
+.bpg{background:rgba(17,138,178,.18);color:#74c0fc;border-radius:5px;padding:2px 7px;font-weight:700;font-size:.7rem;}
+.bes{background:rgba(155,93,229,.18);color:#c77dff;border-radius:5px;padding:2px 7px;font-weight:700;font-size:.7rem;}
+.qrw{display:flex;flex-direction:column;align-items:center;gap:11px;padding:18px;
+  background:var(--s2);border-radius:14px;border:1px solid var(--bd);margin-bottom:14px;}
+#qrcode canvas,#qrcode img{border-radius:7px;}
+.gurl{font-size:.73rem;color:var(--tx2);word-break:break-all;text-align:center;max-width:250px;}
 
-/* ── SCREENS ── */
-.screen { display: none; }
-.screen.on { display: flex; flex-direction: column; min-height: 100vh; }
-@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-.screen.on { animation: fadeUp .3s ease; }
+/* GAME LAYOUT */
+#guruGame{padding:0;}
+.glayout{display:grid;grid-template-columns:1fr 290px;min-height:calc(100vh - 52px);}
+@media(max-width:700px){.glayout{grid-template-columns:1fr;}.gsidebar{order:-1;}}
+.gbarea{padding:12px;}
+.gsidebar{background:var(--s1);border-left:1px solid var(--bd);padding:12px;
+  display:flex;flex-direction:column;gap:9px;overflow-y:auto;}
+#boardCanvas{width:100%;max-width:520px;display:block;border-radius:11px;
+  border:2px solid var(--bd);box-shadow:0 8px 40px rgba(0,0,0,.4);}
 
-/* ── LANDING ── */
-#landing {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 32px 20px;
-  background: radial-gradient(ellipse at 60% 20%, rgba(17,138,178,.18) 0%, transparent 60%),
-              radial-gradient(ellipse at 20% 80%, rgba(155,93,229,.12) 0%, transparent 50%),
-              var(--bg);
-}
-.logo-big { font-size: 4rem; margin-bottom: 8px; }
-.logo-title {
-  font-family: 'Fredoka One', cursive;
-  font-size: clamp(2rem, 7vw, 3.4rem);
-  color: var(--accent);
-  text-shadow: 0 0 40px rgba(255,209,102,.3);
-  line-height: 1.1;
-  margin-bottom: 6px;
-}
-.logo-sub { color: var(--text2); font-size: .95rem; margin-bottom: 40px; }
+/* SCORE */
+.srow{display:flex;align-items:center;gap:8px;background:var(--s2);border:2px solid transparent;
+  border-radius:11px;padding:9px 11px;transition:border-color .2s,background .2s;}
+.srow .sn{flex:1;font-weight:800;font-size:.86rem;}
+.srow .sp{font-size:.75rem;color:var(--tx2);}
+.srow .sd{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.srow .sa{font-size:.72rem;padding:2px 7px;border-radius:10px;font-weight:700;}
 
-.mode-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  max-width: 480px;
-  width: 100%;
-}
-@media (max-width: 400px) { .mode-cards { grid-template-columns: 1fr; } }
+/* SOAL PANEL */
+.soal-panel{background:var(--s2);border:1px solid var(--bd);border-radius:13px;padding:14px;}
+.soal-panel .qnum{font-size:.75rem;color:var(--tx2);margin-bottom:6px;}
+.soal-panel .qtxt{font-size:.9rem;font-weight:700;line-height:1.5;margin-bottom:10px;}
+.type-pill{padding:3px 11px;border-radius:16px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;display:inline-block;margin-bottom:7px;}
+.tp-pg{background:rgba(17,138,178,.22);color:#74c0fc;}
+.tp-es{background:rgba(155,93,229,.22);color:#c77dff;}
+.bobot-tag{font-size:.75rem;font-weight:700;color:var(--g);}
 
-.mode-card {
-  background: var(--s2);
-  border: 2px solid var(--border);
-  border-radius: var(--rr);
-  padding: 28px 20px;
-  cursor: pointer;
-  transition: border-color .2s, transform .15s, background .2s;
-  text-align: center;
-}
-.mode-card:hover { border-color: var(--accent); background: var(--s3); transform: translateY(-3px); }
-.mode-card .icon { font-size: 2.8rem; margin-bottom: 10px; }
-.mode-card h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
-.mode-card p { font-size: .78rem; color: var(--text2); line-height: 1.4; }
-.mode-card.guru-card { border-color: rgba(255,209,102,.3); }
-.mode-card.murid-card { border-color: rgba(6,214,160,.3); }
+/* TIMER (guru side) */
+.gtimer-wrap{margin:8px 0;}
+.gtimer-bar-bg{background:var(--s3);border-radius:5px;height:7px;overflow:hidden;}
+.gtimer-bar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--g),var(--y));transition:width .4s linear,background .3s;}
+.gtimer-bar-fill.danger{background:linear-gradient(90deg,var(--y),var(--r));}
+.gtimer-num{text-align:right;font-size:.75rem;font-weight:700;color:var(--tx2);margin-top:3px;}
 
-/* ── CARD UI ── */
-.card {
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 20px;
-}
-.card + .card { margin-top: 12px; }
+/* ANSWER STATUS */
+.ans-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0;}
+.ans-status-item{background:var(--s3);border:2px solid var(--bd);border-radius:9px;padding:8px 10px;
+  font-size:.78rem;font-weight:700;transition:border-color .3s,background .3s;}
+.ans-status-item.waiting{border-color:var(--bd);color:var(--tx2);}
+.ans-status-item.answered{border-color:var(--y);background:rgba(255,209,102,.08);color:var(--y);}
+.ans-status-item.correct{border-color:var(--g);background:rgba(6,214,160,.1);color:var(--g);}
+.ans-status-item.wrong{border-color:var(--r);background:rgba(239,71,111,.08);color:var(--r);}
+.ans-status-item .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;}
 
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 13px 28px;
-  border-radius: 50px;
-  border: none;
-  font-family: 'Nunito', sans-serif;
-  font-weight: 800;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform .12s, box-shadow .12s, opacity .2s;
-  white-space: nowrap;
-}
-.btn:active { transform: scale(.95); }
-.btn:disabled { opacity: .4; cursor: not-allowed !important; transform: none !important; }
-.btn-y { background: var(--accent); color: #111; box-shadow: 0 4px 16px rgba(255,209,102,.3); }
-.btn-y:hover:not(:disabled) { box-shadow: 0 6px 24px rgba(255,209,102,.5); transform: translateY(-1px); }
-.btn-g { background: var(--green); color: #111; }
-.btn-r { background: var(--red); color: #fff; }
-.btn-b { background: var(--blue); color: #fff; }
-.btn-ghost { background: var(--s3); color: var(--text); border: 1px solid var(--border); }
-.btn-ghost:hover:not(:disabled) { background: var(--border); }
-.btn-sm { padding: 9px 18px; font-size: .85rem; }
-.btn-full { width: 100%; }
+/* ESSAY JUDGE */
+.ej{background:var(--s2);border-radius:11px;padding:13px;border:1px solid var(--bd);}
+.ej .ab{background:var(--bg);border-radius:7px;padding:9px 11px;font-size:.85rem;line-height:1.5;
+  margin:7px 0;border:1px solid var(--bd);font-style:italic;}
+.ej .kj{background:rgba(6,214,160,.09);border:1px solid rgba(6,214,160,.28);border-radius:7px;
+  padding:7px 11px;font-size:.78rem;color:var(--g);margin-bottom:9px;}
+.jbtns{display:flex;gap:7px;}
 
-/* ── INPUTS ── */
-input[type=text], input[type=password], textarea {
-  width: 100%;
-  background: var(--s2);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: 1rem;
-  outline: none;
-  transition: border-color .2s;
-}
-input[type=text]:focus, input[type=password]:focus, textarea:focus { border-color: var(--accent); }
-textarea { resize: vertical; min-height: 90px; }
+/* RESULT SUMMARY */
+.result-summary{background:var(--s2);border-radius:11px;padding:12px;border:1px solid var(--bd);}
+.rs-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:.83rem;}
+.rs-row:last-child{border-bottom:none;}
+.rs-icon{font-size:1.1rem;width:22px;text-align:center;}
 
-/* ── SECTION LABEL ── */
-.slabel {
-  font-size: .7rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 8px;
-}
+/* MURID */
+#muridPilih{padding:0;}
+#muridGame{padding:0;}
+.mgame-inner{padding:16px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.gpick-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;max-width:370px;width:100%;}
+.gpick-btn{background:var(--s2);border:2px solid var(--bd);border-radius:var(--r14);padding:18px 12px;
+  cursor:pointer;text-align:center;transition:border-color .2s,transform .15s;}
+.gpick-btn:hover{transform:translateY(-2px);}
+.gpick-btn .dot3{width:16px;height:16px;border-radius:50%;margin:0 auto 7px;}
+.gpick-btn .gn{font-weight:800;font-size:.92rem;}
+.msoal-card{max-width:470px;width:100%;background:var(--s1);border:1px solid var(--bd);
+  border-radius:var(--r24);padding:20px;text-align:left;}
+.qhdr{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.twrap{margin-bottom:12px;}
+.tbar-bg{background:var(--s3);border-radius:5px;height:8px;overflow:hidden;}
+.tbar-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--g),var(--y));transition:width .4s linear,background .3s;}
+.tbar-fill.danger{background:linear-gradient(90deg,var(--y),var(--r));}
+.tnum{text-align:right;font-size:.76rem;font-weight:700;color:var(--tx2);margin-top:3px;}
+.qtxt{font-size:.98rem;font-weight:700;line-height:1.6;margin-bottom:14px;}
+.clist{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.copt{background:var(--s2);border:2px solid var(--bd);border-radius:11px;padding:11px 13px;
+  color:var(--tx);font-family:'Nunito',sans-serif;font-size:.92rem;font-weight:600;cursor:pointer;
+  text-align:left;transition:border-color .15s,background .15s,transform .1s;display:flex;align-items:center;gap:11px;}
+.copt:hover:not(:disabled){border-color:var(--y);background:rgba(255,209,102,.07);transform:translateX(3px);}
+.copt.sel{border-color:var(--y) !important;background:rgba(255,209,102,.1) !important;}
+.copt.cor{border-color:var(--g) !important;background:rgba(6,214,160,.11) !important;}
+.copt.wrg{border-color:var(--r) !important;background:rgba(239,71,111,.09) !important;}
+.copt:disabled{cursor:default;}
+.ckey{width:26px;height:26px;border-radius:7px;background:var(--s3);display:flex;align-items:center;
+  justify-content:center;font-weight:800;font-size:.76rem;flex-shrink:0;}
+.mwait{display:flex;flex-direction:column;align-items:center;gap:12px;padding:30px 20px;text-align:center;max-width:370px;width:100%;}
+.mwait .wi{font-size:2.8rem;}
+.mwait h3{font-size:1.05rem;font-weight:800;}
+.mwait p{font-size:.84rem;color:var(--tx2);}
+.mresult{display:flex;flex-direction:column;align-items:center;padding:22px;text-align:center;max-width:370px;width:100%;}
+.mresult .ri{font-size:3.2rem;margin-bottom:8px;}
+.mresult h2{font-family:'Fredoka One',cursive;font-size:1.9rem;}
+.mresult p{color:var(--tx2);margin-top:5px;font-size:.88rem;}
+.msub-wait{text-align:center;padding:18px 20px;max-width:370px;width:100%;}
+.msub-wait .si{font-size:2.2rem;margin-bottom:7px;}
 
-/* ── HEADER BAR ── */
-.topbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--s1);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.topbar .title { font-family: 'Fredoka One', cursive; font-size: 1.15rem; color: var(--accent); flex: 1; }
-.topbar .back-btn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1.4rem; padding: 4px; }
+/* WINNER */
+#winnerScreen{align-items:center;justify-content:center;padding:36px 20px;text-align:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(255,209,102,.11) 0%,transparent 60%),var(--bg);}
+.wt{font-size:5.5rem;animation:bnc 1s ease infinite alternate;}
+@keyframes bnc{to{transform:translateY(-13px);}}
+.wn{font-family:'Fredoka One',cursive;font-size:clamp(1.8rem,7vw,3.2rem);color:var(--y);
+  text-shadow:0 0 40px rgba(255,209,102,.35);margin:9px 0 4px;}
+.ftable{max-width:360px;width:100%;margin:18px auto;display:flex;flex-direction:column;gap:7px;}
+.fr{display:flex;align-items:center;gap:11px;background:var(--s1);border:1px solid var(--bd);border-radius:11px;padding:12px 15px;}
+.fr.first{border-color:var(--y);background:rgba(255,209,102,.07);}
+.fr .med{font-size:1.2rem;width:30px;text-align:center;}
+.fr .fn{flex:1;font-weight:800;}
+.fr .fp{color:var(--tx2);font-size:.83rem;}
 
-/* ── PIN MODAL ── */
-.overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.75);
-  backdrop-filter: blur(6px);
-  z-index: 100;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-.overlay.open { display: flex; }
-.modal {
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--rr);
-  padding: 28px;
-  max-width: 360px;
-  width: 100%;
-  box-shadow: 0 24px 64px rgba(0,0,0,.6);
-}
-.modal h3 { font-family: 'Fredoka One', cursive; font-size: 1.4rem; color: var(--accent); margin-bottom: 16px; }
-.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+/* TOAST */
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--s1);border:1px solid var(--bd);border-radius:50px;padding:11px 20px;
+  font-weight:700;font-size:.88rem;z-index:300;transition:transform .33s cubic-bezier(.175,.885,.32,1.275);
+  white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.4);pointer-events:none;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.snake{border-color:var(--r);color:var(--r);}
+#toast.ladder{border-color:var(--g);color:var(--g);}
+#toast.info{border-color:var(--y);color:var(--y);}
 
-/* ── GURU SETUP ── */
-#guruSetup { padding: 0 16px 32px; }
-.group-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-.group-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+/* WAITING PULSE */
+.wpulse{animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.55;}}
 
-.rules-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-.rule-chip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: .8rem;
-  font-weight: 700;
-}
-.rule-chip.good { background: rgba(6,214,160,.15); color: var(--green); border: 1px solid rgba(6,214,160,.3); }
-.rule-chip.bad  { background: rgba(239,71,111,.15); color: var(--red); border: 1px solid rgba(239,71,111,.3); }
-.rule-chip.mid  { background: rgba(155,93,229,.15); color: var(--purple); border: 1px solid rgba(155,93,229,.3); }
+/* SIMULTANEOUS COUNTDOWN */
+.big-timer{font-family:'Fredoka One',cursive;font-size:4rem;color:var(--y);
+  text-align:center;text-shadow:0 0 30px rgba(255,209,102,.4);line-height:1;}
+.ans-count{font-size:.85rem;color:var(--tx2);text-align:center;margin-top:4px;}
 
-/* ── SOAL TABLE ── */
-.soal-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
-.soal-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-.soal-table th {
-  background: var(--s3);
-  color: var(--text2);
-  font-weight: 700;
-  padding: 10px 12px;
-  text-align: left;
-}
-.soal-table td { padding: 9px 12px; border-top: 1px solid var(--border); vertical-align: top; }
-.soal-table tr:hover td { background: var(--s2); }
-.badge-pg { background: rgba(17,138,178,.2); color: var(--blue); border-radius: 6px; padding: 2px 8px; font-weight: 700; font-size: .72rem; }
-.badge-essay { background: rgba(155,93,229,.2); color: var(--purple); border-radius: 6px; padding: 2px 8px; font-weight: 700; font-size: .72rem; }
-
-/* ── QR SHARE ── */
-.qr-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-  background: var(--s2);
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  margin-bottom: 16px;
-}
-#qrcode canvas, #qrcode img { border-radius: 8px; }
-.game-url {
-  font-size: .75rem;
-  color: var(--text2);
-  word-break: break-all;
-  text-align: center;
-  max-width: 260px;
-}
-
-/* ── GAME BOARD (GURU) ── */
-#guruGame { padding: 0; }
-.game-layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 0;
-  min-height: calc(100vh - 54px);
-}
-@media (max-width: 720px) {
-  .game-layout { grid-template-columns: 1fr; }
-  .game-sidebar { order: -1; }
-}
-.game-board-area { padding: 12px; }
-.game-sidebar {
-  background: var(--s1);
-  border-left: 1px solid var(--border);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  overflow-y: auto;
-}
-
-#boardCanvas {
-  width: 100%;
-  max-width: 520px;
-  display: block;
-  border-radius: 12px;
-  border: 2px solid var(--border);
-  box-shadow: 0 8px 40px rgba(0,0,0,.4);
-}
-
-/* Score rows */
-.score-row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: var(--s2);
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 10px 12px;
-  transition: border-color .2s;
-}
-.score-row.active { border-color: var(--accent); background: rgba(255,209,102,.07); }
-.score-row .sname { flex: 1; font-weight: 800; font-size: .88rem; }
-.score-row .spos { font-size: .78rem; color: var(--text2); }
-.score-row .sdot { width: 13px; height: 13px; border-radius: 50%; flex-shrink: 0; }
-
-/* Turn badge */
-.turn-pill {
-  background: linear-gradient(135deg, var(--accent), #ffab33);
-  color: #111;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font-weight: 800;
-  font-size: .9rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Q status */
-.q-status-grid { display: flex; flex-wrap: wrap; gap: 4px; }
-.q-dot2 { width: 11px; height: 11px; border-radius: 3px; transition: background .3s; }
-
-/* Waiting banner */
-.wait-banner {
-  background: rgba(255,209,102,.1);
-  border: 1px solid rgba(255,209,102,.3);
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: .85rem;
-  font-weight: 700;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.6; } }
-
-/* Guru essay judge */
-.essay-judge {
-  background: var(--s2);
-  border-radius: 12px;
-  padding: 14px;
-  border: 1px solid var(--border);
-}
-.essay-judge .ans-box {
-  background: var(--bg);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: .88rem;
-  line-height: 1.5;
-  margin: 8px 0;
-  border: 1px solid var(--border);
-  font-style: italic;
-}
-.essay-judge .kunci {
-  background: rgba(6,214,160,.1);
-  border: 1px solid rgba(6,214,160,.3);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: .8rem;
-  color: var(--green);
-  margin-bottom: 10px;
-}
-.judge-btns { display: flex; gap: 8px; }
-
-/* ── MURID SCREEN ── */
-#muridWait, #muridGame {
-  align-items: center;
-  justify-content: center;
-  padding: 24px 20px;
-  text-align: center;
-}
-
-.wait-circle {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 4px solid var(--border);
-  border-top-color: var(--accent);
-  animation: spin 1.2s linear infinite;
-  margin: 0 auto 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.murid-soal-card {
-  max-width: 480px;
-  width: 100%;
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: var(--rr);
-  padding: 22px;
-  text-align: left;
-}
-
-.q-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.type-pill {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: .72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: .5px;
-}
-.type-pill.pg { background: rgba(17,138,178,.25); color: #74c0fc; }
-.type-pill.essay { background: rgba(155,93,229,.25); color: #c77dff; }
-
-.bobot-tag {
-  margin-left: auto;
-  font-size: .75rem;
-  font-weight: 700;
-  color: var(--green);
-}
-
-.timer-wrap { margin-bottom: 14px; }
-.timer-bar-bg { background: var(--s3); border-radius: 6px; height: 8px; overflow: hidden; }
-.timer-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--green), var(--accent)); transition: width .5s linear, background .3s; }
-.timer-bar-fill.danger { background: linear-gradient(90deg, var(--accent), var(--red)); }
-.timer-num { text-align: right; font-size: .78rem; font-weight: 700; color: var(--text2); margin-top: 4px; }
-
-.q-text { font-size: 1rem; font-weight: 700; line-height: 1.6; margin-bottom: 16px; }
-
-.choices-list { display: flex; flex-direction: column; gap: 9px; margin-bottom: 14px; }
-.choice-opt {
-  background: var(--s2);
-  border: 2px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px;
-  color: var(--text);
-  font-family: 'Nunito', sans-serif;
-  font-size: .95rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
-  transition: border-color .15s, background .15s, transform .1s;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.choice-opt:hover:not(:disabled) { border-color: var(--accent); background: rgba(255,209,102,.08); transform: translateX(3px); }
-.choice-opt.selected { border-color: var(--accent) !important; background: rgba(255,209,102,.1) !important; }
-.choice-opt.correct { border-color: var(--green) !important; background: rgba(6,214,160,.12) !important; }
-.choice-opt.wrong { border-color: var(--red) !important; background: rgba(239,71,111,.1) !important; }
-.choice-opt:disabled { cursor: default; }
-.choice-key {
-  width: 28px; height: 28px;
-  border-radius: 8px;
-  background: var(--s3);
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 800;
-  font-size: .78rem;
-  flex-shrink: 0;
-}
-
-/* Result feedback */
-.result-pop {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px;
-  text-align: center;
-}
-.result-pop .icon { font-size: 3.5rem; margin-bottom: 10px; }
-.result-pop h2 { font-family: 'Fredoka One', cursive; font-size: 2rem; }
-.result-pop p { color: var(--text2); margin-top: 6px; }
-
-/* ── TOAST ── */
-#toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: 50px;
-  padding: 12px 22px;
-  font-weight: 700;
-  font-size: .9rem;
-  z-index: 300;
-  transition: transform .35s cubic-bezier(.175,.885,.32,1.275);
-  white-space: nowrap;
-  box-shadow: 0 8px 32px rgba(0,0,0,.4);
-  pointer-events: none;
-}
-#toast.show { transform: translateX(-50%) translateY(0); }
-#toast.snake { border-color: var(--red); color: var(--red); }
-#toast.ladder { border-color: var(--green); color: var(--green); }
-#toast.info { border-color: var(--accent); color: var(--accent); }
-
-/* ── WINNER ── */
-#winnerScreen {
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  background: radial-gradient(ellipse at 50% 30%, rgba(255,209,102,.12) 0%, transparent 60%),
-              var(--bg);
-}
-.winner-trophy { font-size: 6rem; animation: bounce 1s ease infinite alternate; }
-@keyframes bounce { to { transform: translateY(-14px); } }
-.winner-name {
-  font-family: 'Fredoka One', cursive;
-  font-size: clamp(2rem,8vw,3.5rem);
-  color: var(--accent);
-  text-shadow: 0 0 40px rgba(255,209,102,.4);
-  margin: 10px 0 4px;
-}
-.final-table { max-width: 380px; width: 100%; margin: 20px auto; display: flex; flex-direction: column; gap: 8px; }
-.final-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 13px 16px;
-}
-.final-row.first { border-color: var(--accent); background: rgba(255,209,102,.07); }
-.final-row .medal { font-size: 1.3rem; width: 32px; text-align: center; }
-.final-row .fn { flex: 1; font-weight: 800; }
-.final-row .fp { color: var(--text2); font-size: .85rem; }
-
-/* Murid group select */
-.group-pick-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  max-width: 380px;
-  width: 100%;
-  margin: 0 auto;
-}
-.group-pick-btn {
-  background: var(--s2);
-  border: 2px solid var(--border);
-  border-radius: var(--r);
-  padding: 20px 12px;
-  cursor: pointer;
-  text-align: center;
-  transition: border-color .2s, transform .15s;
-}
-.group-pick-btn:hover { transform: translateY(-2px); }
-.group-pick-btn .dot3 { width: 18px; height: 18px; border-radius: 50%; margin: 0 auto 8px; }
-.group-pick-btn .gname { font-weight: 800; font-size: .95rem; }
-
-/* Murid wait soal */
-.murid-wait-soal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  max-width: 380px;
-  width: 100%;
-}
-.murid-pos-badge {
-  background: var(--s2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 20px;
-  font-size: .9rem;
-  font-weight: 700;
-}
-
-/* submitted indicator */
-.submitted-msg {
-  text-align: center;
-  padding: 20px;
-  color: var(--text2);
-  font-size: .9rem;
-}
-.submitted-msg .big { font-size: 2.5rem; margin-bottom: 8px; }
-
-/* firebase config help */
-.config-help {
-  background: rgba(239,71,111,.1);
-  border: 1px solid rgba(239,71,111,.3);
-  border-radius: 12px;
-  padding: 14px;
-  font-size: .82rem;
-  line-height: 1.6;
-  color: var(--text2);
-  margin: 12px 0;
-}
-.config-help a { color: var(--accent); }
-.config-help code {
-  background: var(--s3);
-  border-radius: 4px;
-  padding: 1px 5px;
-  font-family: monospace;
-  font-size: .85em;
-  color: var(--green);
-}
+/* pos badge */
+.pos-badge{background:var(--s2);border:1px solid var(--bd);border-radius:9px;
+  padding:9px 16px;font-size:.86rem;font-weight:700;text-align:center;}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════ LANDING ══════════════════════ -->
+<!-- LANDING -->
 <div id="landing" class="screen on">
-  <div class="logo-big">🎲🐍🪜</div>
+  <div style="font-size:3.5rem;margin-bottom:6px;">🎲🐍🪜</div>
   <div class="logo-title">Ular Tangga Kuis</div>
-  <div class="logo-sub">Bahasa Indonesia — Fiksi & Nonfiksi Kelas 7</div>
-
-  <div id="fbConfigWarning" class="config-help" style="max-width:480px;display:none;">
-    ⚠️ <strong>Firebase belum dikonfigurasi.</strong> Game ini butuh Firebase Realtime Database agar siswa bisa jawab dari HP masing-masing.<br><br>
-    Cara setup (gratis):<br>
-    1. Buka <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
-    2. Buat project baru → aktifkan <strong>Realtime Database</strong><br>
-    3. Di Rules, set: <code>".read": true, ".write": true</code><br>
-    4. Copy config JS ke variabel <code>FIREBASE_CONFIG</code> di script ini<br><br>
-    Untuk saat ini, game berjalan dalam <strong>mode lokal</strong> (1 perangkat).
-  </div>
-
+  <div class="logo-sub">Bahasa Indonesia · Fiksi & Nonfiksi · Kelas 7</div>
   <div class="mode-cards">
-    <div class="mode-card guru-card" onclick="goGuru()">
+    <div class="mode-card gc" onclick="goGuru()">
       <div class="icon">👩‍🏫</div>
       <h3>Mode Guru</h3>
-      <p>Setup, lihat papan, nilai essay, kontrol game</p>
+      <p>Setup, lempar soal, lihat papan & nilai essay</p>
     </div>
-    <div class="mode-card murid-card" onclick="goMurid()">
+    <div class="mode-card mc" onclick="goMurid()">
       <div class="icon">📱</div>
       <h3>Mode Siswa</h3>
-      <p>Jawab soal langsung dari HP kamu</p>
+      <p>Buka di HP, pilih kelompok & jawab soal bareng</p>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════ GURU PIN ══════════════════════ -->
-<div class="overlay" id="guruPinOverlay">
+<!-- GURU PIN -->
+<div class="overlay" id="pinOverlay">
   <div class="modal">
     <h3>🔐 PIN Guru</h3>
-    <p style="color:var(--text2);font-size:.85rem;margin-bottom:14px;">Masukkan PIN untuk akses mode guru</p>
-    <input type="password" id="guruPinInput" placeholder="PIN (default: 1234)" maxlength="8">
-    <p id="pinError" style="color:var(--red);font-size:.8rem;margin-top:6px;display:none;">PIN salah!</p>
-    <div class="modal-btns">
-      <button class="btn btn-ghost btn-sm" onclick="closeOverlay('guruPinOverlay')">Batal</button>
-      <button class="btn btn-y btn-sm" onclick="checkGuruPin()">Masuk →</button>
+    <p style="color:var(--tx2);font-size:.82rem;margin-bottom:12px;">Masukkan PIN untuk masuk mode guru</p>
+    <input type="password" id="pinInput" placeholder="PIN (default: 1234)" maxlength="8">
+    <p id="pinErr" style="color:var(--r);font-size:.78rem;margin-top:5px;display:none;">PIN salah!</p>
+    <div class="mbtns">
+      <button class="btn bgh bsm" onclick="closeOv('pinOverlay')">Batal</button>
+      <button class="btn by bsm" onclick="checkPin()">Masuk →</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════ GURU SETUP ══════════════════════ -->
+<!-- GURU SETUP -->
 <div id="guruSetup" class="screen">
   <div class="topbar">
-    <button class="back-btn" onclick="showScreen('landing')">←</button>
-    <span class="title">👩‍🏫 Setup Permainan</span>
+    <button class="bk" onclick="ss('landing')">←</button>
+    <span class="ttl">👩‍🏫 Setup Permainan</span>
   </div>
-  <div style="padding:16px; max-width:700px; margin:0 auto; width:100%;">
-
-    <!-- Groups -->
+  <div style="padding:14px;max-width:680px;margin:0 auto;width:100%;">
     <div class="card">
-      <div class="slabel">🏷️ Nama Kelompok (5 kelompok)</div>
-      <div id="groupInputsSetup"></div>
+      <div class="slbl">🏷️ Nama 5 Kelompok</div>
+      <div id="gnamesSetup"></div>
     </div>
-
-    <!-- Rules -->
     <div class="card">
-      <div class="slabel">📋 Aturan Gerak</div>
-      <div class="rules-chips">
-        <div class="rule-chip good">✅ PG Benar = +3 kotak</div>
-        <div class="rule-chip mid">📝 Essay Benar = +6 kotak</div>
-        <div class="rule-chip bad">❌ Salah/Timeout = −2 kotak</div>
+      <div class="slbl">📋 Aturan — Semua Kelompok Jawab Bersamaan</div>
+      <div class="rchips">
+        <div class="rc rcg">✅ PG Benar = +3 kotak</div>
+        <div class="rc rcm">📝 Essay Benar = +6 kotak</div>
+        <div class="rc rcb">❌ Salah/Timeout = −2 kotak</div>
+        <div class="rc rcy">⚡ Tercepat benar = +1 bonus</div>
       </div>
-      <p style="color:var(--text2);font-size:.78rem;margin-top:10px;">Setiap kelompok mendapat <strong style="color:var(--accent)">5 soal PG + 5 soal Essay</strong> (total 10 soal). Soal dibagikan merata & dijawab dari HP siswa.</p>
+      <p style="color:var(--tx2);font-size:.76rem;margin-top:9px;">Tiap soal tampil di semua HP sekaligus. Semua jawab dalam waktu bersamaan. Papan bergerak setelah semua menjawab atau waktu habis.</p>
     </div>
-
-    <!-- Soal preview -->
     <div class="card">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-        <div class="slabel" style="margin:0;">📋 Pembagian Soal</div>
-        <button class="btn btn-ghost btn-sm" onclick="acakSoal()" style="margin-left:auto;">🔀 Acak Ulang</button>
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;">
+        <div class="slbl" style="margin:0;">📋 Pembagian Soal (5 PG + 5 Essay per kelompok)</div>
+        <button class="btn bgh bsm" onclick="acakSoal()" style="margin-left:auto;">🔀 Acak</button>
       </div>
-      <div class="soal-table-wrap">
-        <table class="soal-table" id="soalPreviewTable">
-          <thead><tr>
-            <th>#</th><th>Tipe</th><th>Pertanyaan</th><th>Kelompok</th>
-          </tr></thead>
-          <tbody id="soalPreviewBody"></tbody>
+      <div class="stw">
+        <table class="st">
+          <thead><tr><th>#</th><th>Tipe</th><th>Pertanyaan</th><th>Kelompok</th></tr></thead>
+          <tbody id="soalTbody"></tbody>
         </table>
       </div>
     </div>
-
-    <!-- QR / Share -->
     <div class="card">
-      <div class="slabel">📱 Bagikan ke Siswa</div>
-      <div class="qr-wrap">
+      <div class="slbl">📱 Bagikan ke Siswa</div>
+      <div class="qrw">
         <div id="qrcode"></div>
-        <div class="game-url" id="gameUrlDisplay">—</div>
-        <button class="btn btn-ghost btn-sm" onclick="copyGameUrl()">📋 Salin Link</button>
+        <div class="gurl" id="gurlTxt">—</div>
+        <button class="btn bgh bsm" onclick="copyUrl()">📋 Salin Link</button>
       </div>
-      <p style="color:var(--text2);font-size:.78rem;text-align:center;">Siswa scan QR atau buka link ini di HP mereka, lalu pilih kelompok dan tunggu soal muncul.</p>
+      <p style="color:var(--tx2);font-size:.76rem;text-align:center;">Siswa scan QR atau buka link di HP → pilih kelompok → tunggu soal dari guru.</p>
     </div>
-
-    <div style="display:flex;gap:12px;margin-top:8px;">
-      <button class="btn btn-ghost btn-full" onclick="showScreen('landing')">← Kembali</button>
-      <button class="btn btn-y btn-full" onclick="mulaiGame()">▶ Mulai Game!</button>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn bgh bfw" onclick="ss('landing')">← Kembali</button>
+      <button class="btn by bfw" onclick="mulaiGame()">▶ Mulai Game!</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════ GURU GAME ══════════════════════ -->
+<!-- GURU GAME -->
 <div id="guruGame" class="screen">
   <div class="topbar">
-    <button class="back-btn" onclick="confirmReset()">←</button>
-    <span class="title">🐍 Ular Tangga</span>
-    <span id="soalProgress" style="font-size:.8rem;color:var(--text2);">Soal 0/50</span>
-    <button class="btn btn-ghost btn-sm" onclick="confirmReset()" style="margin-left:8px;">↩ Reset</button>
+    <button class="bk" onclick="konfirmReset()">←</button>
+    <span class="ttl">🐍 Ular Tangga</span>
+    <span id="qProg" style="font-size:.78rem;color:var(--tx2);">Soal 0/50</span>
+    <button class="btn bgh bsm" onclick="konfirmReset()" style="margin-left:6px;">↩ Reset</button>
   </div>
-
-  <div class="game-layout">
-    <!-- Board -->
-    <div class="game-board-area">
+  <div class="glayout">
+    <div class="gbarea">
       <canvas id="boardCanvas" width="520" height="520"></canvas>
     </div>
-
-    <!-- Sidebar -->
-    <div class="game-sidebar">
-      <div class="turn-pill" id="turnPill">🎯 Menunggu...</div>
-
-      <!-- Skor kelompok -->
+    <div class="gsidebar">
+      <!-- Score list -->
       <div>
-        <div class="slabel">👥 Kelompok</div>
+        <div class="slbl">👥 Posisi Kelompok</div>
         <div id="scoreRows"></div>
       </div>
-
-      <!-- Q status -->
-      <div>
-        <div class="slabel">📊 Progress Soal Giliran Ini</div>
-        <div class="q-status-grid" id="qStatusGrid"></div>
-      </div>
-
-      <!-- Waiting for answer -->
-      <div id="waitAnswerDiv" style="display:none;">
-        <div class="wait-banner">⏳ Menunggu jawaban siswa...</div>
-      </div>
-
-      <!-- Essay judge -->
-      <div id="essayJudgeDiv" style="display:none;">
-        <div class="essay-judge">
-          <div class="slabel">✍️ Nilai Jawaban Essay</div>
-          <div class="ans-box" id="essayAnswerShow">—</div>
-          <div class="kunci" id="essayKunciShow">—</div>
-          <div class="judge-btns">
-            <button class="btn btn-g btn-sm" onclick="judgeEssay(true)">✅ Benar +6</button>
-            <button class="btn btn-r btn-sm" onclick="judgeEssay(false)">❌ Salah −2</button>
+      <!-- Current soal panel -->
+      <div id="guruSoalPanel" style="display:none;">
+        <div class="soal-panel">
+          <div id="gQNum" class="qnum">—</div>
+          <div id="gTypePill" class="type-pill tp-pg">PG</div>
+          <span id="gBobotTag" class="bobot-tag" style="margin-left:6px;">+3 kotak</span>
+          <div id="gQTxt" class="qtxt">—</div>
+          <!-- Timer -->
+          <div class="gtimer-wrap">
+            <div class="gtimer-bar-bg"><div class="gtimer-bar-fill" id="gTimerFill" style="width:100%"></div></div>
+            <div class="gtimer-num"><span id="gTimerNum">30</span>s</div>
           </div>
+          <!-- Answer status per group -->
+          <div class="slbl" style="margin-top:8px;">Status Jawaban</div>
+          <div class="ans-status-grid" id="ansStatusGrid"></div>
+          <div class="ans-count" id="ansCountTxt">0/5 menjawab</div>
         </div>
       </div>
-
-      <!-- Lanjut btn -->
-      <button class="btn btn-y btn-full" id="btnLanjut" onclick="lanjutSoal()" style="display:none;">
-        Soal Berikutnya ▶
-      </button>
+      <!-- Essay judge (appears per group) -->
+      <div id="essayJudgeArea" style="display:none;">
+        <div class="slbl">✍️ Nilai Jawaban Essay</div>
+        <div id="essayJudgeList"></div>
+      </div>
+      <!-- Lempar soal / lanjut btn -->
+      <button class="btn by bfw" id="btnLempar" onclick="lemparSoal()">🎯 Lempar Soal!</button>
+      <button class="btn bg bfw" id="btnLanjut" onclick="lanjutSoal()" style="display:none;">Soal Berikutnya ▶</button>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════ MURID - PILIH KELOMPOK ══════════════════════ -->
+<!-- MURID PILIH KELOMPOK -->
 <div id="muridPilih" class="screen">
   <div class="topbar">
-    <button class="back-btn" onclick="showScreen('landing')">←</button>
-    <span class="title">📱 Pilih Kelompokmu</span>
+    <button class="bk" onclick="ss('landing')">←</button>
+    <span class="ttl">📱 Pilih Kelompokmu</span>
   </div>
-  <div style="padding:24px 16px;text-align:center;">
-    <p style="color:var(--text2);margin-bottom:20px;font-size:.9rem;">Pilih kelompokmu. Kamu akan otomatis mendapat soal saat giliranmu tiba.</p>
-    <div class="group-pick-grid" id="groupPickGrid"></div>
-    <div id="gameNotStarted" style="display:none;margin-top:20px;">
-      <div class="wait-banner" style="justify-content:center;">⏳ Menunggu guru memulai game...</div>
+  <div style="padding:22px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;">
+    <p style="color:var(--tx2);font-size:.88rem;text-align:center;">Pilih kelompokmu. Soal akan muncul otomatis di HP kamu saat guru melempar soal.</p>
+    <div class="gpick-grid" id="gpickGrid"></div>
+    <div id="gameNotYet" style="display:none;width:100%;max-width:370px;">
+      <div class="card wpulse" style="text-align:center;color:var(--y);font-weight:700;font-size:.88rem;">
+        ⏳ Menunggu guru memulai game...
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════ MURID - GAME ══════════════════════ -->
+<!-- MURID GAME -->
 <div id="muridGame" class="screen">
   <div class="topbar">
-    <span class="title" id="muridTopTitle">📱 —</span>
-    <span id="muridPos" style="font-size:.8rem;color:var(--text2);">Kotak 1</span>
+    <span class="ttl" id="mTopTitle">📱 —</span>
+    <span id="mPosTag" style="font-size:.78rem;color:var(--tx2);">Kotak 1</span>
   </div>
-  <div style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:16px;">
-
-    <!-- Waiting for turn -->
-    <div id="muridWaitTurn" style="text-align:center;padding:30px 20px;">
-      <div style="font-size:3rem;margin-bottom:12px;">⏳</div>
-      <div style="font-weight:800;font-size:1.1rem;margin-bottom:6px;">Bukan giliranmu</div>
-      <div style="color:var(--text2);font-size:.88rem;" id="muridWaitMsg">Tunggu giliranmu ya...</div>
+  <div class="mgame-inner">
+    <!-- Wait for soal -->
+    <div id="mWait" class="mwait">
+      <div class="wi">⏳</div>
+      <h3>Menunggu soal...</h3>
+      <p id="mWaitMsg">Guru belum melempar soal. Bersiap-siap ya!</p>
     </div>
-
     <!-- Soal card -->
-    <div id="muridSoalCard" class="murid-soal-card" style="display:none;">
-      <div class="q-header">
+    <div id="mSoalCard" class="msoal-card" style="display:none;">
+      <div class="qhdr">
         <span class="type-pill" id="mTypePill">PG</span>
-        <span id="mQNum" style="font-size:.8rem;color:var(--text2);">Soal 1/10</span>
-        <span class="bobot-tag" id="mBobotTag">+3 kotak</span>
+        <span id="mQNum" style="font-size:.78rem;color:var(--tx2);">Soal 1/10</span>
+        <span id="mBobot" style="margin-left:auto;font-size:.75rem;font-weight:700;color:var(--g);">+3</span>
       </div>
-      <div class="timer-wrap">
-        <div class="timer-bar-bg">
-          <div class="timer-bar-fill" id="mTimerFill" style="width:100%"></div>
-        </div>
-        <div class="timer-num" id="mTimerNum">30s</div>
+      <div class="twrap">
+        <div class="tbar-bg"><div class="tbar-fill" id="mTimerFill" style="width:100%"></div></div>
+        <div class="tnum" id="mTimerNum">30s</div>
       </div>
-      <div class="q-text" id="mQText">—</div>
-
-      <!-- PG choices -->
-      <div class="choices-list" id="mChoices"></div>
-
-      <!-- Essay input -->
+      <div class="qtxt" id="mQTxt">—</div>
+      <div class="clist" id="mChoices"></div>
       <div id="mEssayDiv" style="display:none;">
         <textarea id="mEssayInput" placeholder="Tulis jawabanmu di sini..."></textarea>
-        <button class="btn btn-y btn-full" onclick="kirimEssay()" style="margin-top:10px;" id="btnKirimEssay">
-          Kirim Jawaban ✉️
-        </button>
+        <button class="btn by bfw" onclick="kirimEssay()" style="margin-top:9px;" id="btnKirimEssay">Kirim Jawaban ✉️</button>
       </div>
     </div>
-
-    <!-- Submitted / waiting result -->
-    <div id="muridSubmitted" style="display:none;" class="submitted-msg">
-      <div class="big">✅</div>
-      <div style="font-weight:800;font-size:1.1rem;margin-bottom:4px;">Jawaban Terkirim!</div>
-      <div id="muridSubmittedMsg">Menunggu penilaian guru...</div>
+    <!-- Submitted -->
+    <div id="mSubmitted" class="msub-wait" style="display:none;">
+      <div class="si">✅</div>
+      <div style="font-weight:800;font-size:1.05rem;margin-bottom:4px;">Jawaban Terkirim!</div>
+      <div id="mSubMsg" style="color:var(--tx2);font-size:.85rem;">Menunggu semua kelompok selesai...</div>
     </div>
-
     <!-- Result -->
-    <div id="muridResult" class="result-pop" style="display:none;">
-      <div class="icon" id="mResultIcon">✅</div>
-      <h2 id="mResultTitle" style="color:var(--green)">Benar!</h2>
-      <p id="mResultSub">+3 kotak naik</p>
+    <div id="mResult" class="mresult" style="display:none;">
+      <div class="ri" id="mRIcon">✅</div>
+      <h2 id="mRTitle" style="color:var(--g)">Benar!</h2>
+      <p id="mRSub">+3 kotak naik</p>
+      <div class="pos-badge" id="mNewPos" style="margin-top:12px;">📍 Kotak 1</div>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════════════ WINNER ══════════════════════ -->
+<!-- WINNER -->
 <div id="winnerScreen" class="screen">
-  <div class="winner-trophy">🏆</div>
-  <div class="winner-name" id="winnerName">—</div>
-  <p style="color:var(--text2);" id="winnerSub">Permainan selesai!</p>
-  <div class="final-table" id="finalTable"></div>
-  <button class="btn btn-y" onclick="location.reload()" style="margin-top:8px;">🔄 Main Lagi</button>
+  <div class="wt">🏆</div>
+  <div class="wn" id="wName">—</div>
+  <p style="color:var(--tx2);" id="wSub">Permainan selesai!</p>
+  <div class="ftable" id="finalTable"></div>
+  <button class="btn by" onclick="location.reload()" style="margin-top:10px;">🔄 Main Lagi</button>
 </div>
 
-<!-- ══════════════════════ TOAST ══════════════════════ -->
 <div id="toast"></div>
-
 
 <script>
 'use strict';
 
-// ════════════════════════════════════════════════════════
-//  FIREBASE CONFIG — ISI DENGAN CONFIG FIREBASE KAMU
-//  Atau biarkan kosong untuk mode LOKAL (1 perangkat)
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
+//  FIREBASE CONFIG
+// ═══════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCjKKQuZ8qq9NBnRfJDIS-KsL_eDPEJcc",
   authDomain: "kuis-interaktif-1e118.firebaseapp.com",
@@ -867,919 +455,918 @@ const FIREBASE_CONFIG = {
 };
 
 const GURU_PIN = "1234";
-
-// ════════════════════════════════════════════════════════
-//  CONSTANTS
-// ════════════════════════════════════════════════════════
 const GROUP_COLORS = ['#ffd166','#ef476f','#06d6a0','#118ab2','#9b5de5'];
-const GROUP_NAMES_DEFAULT = ['Kelompok 1','Kelompok 2','Kelompok 3','Kelompok 4','Kelompok 5'];
-const TOTAL_CELLS = 50;
-const BOBOT_PG = 3;
-const BOBOT_ESSAY = 6;
-const DENDA = 2;
-const TIMER_PG = 30;
-const TIMER_ESSAY = 60;
-const SOAL_PER_GROUP = 10; // 5 PG + 5 Essay
+const GROUP_DEF    = ['Kelompok 1','Kelompok 2','Kelompok 3','Kelompok 4','Kelompok 5'];
+const TOTAL_CELLS  = 50;
+const BOBOT_PG     = 3;
+const BOBOT_ESSAY  = 6;
+const DENDA        = 2;
+const BONUS_CEPAT  = 1;
+const TIMER_PG     = 30;
+const TIMER_ESSAY  = 60;
+const SOAL_PER_GROUP = 10;
 
-// Ular & Tangga (papan 50 kotak)
-const SNAKES  = { 49:28, 46:7,  38:15, 31:9,  44:26 };
-const LADDERS = { 4:18,  8:30,  20:42, 13:35, 24:45 };
+// Ular & Tangga (50 kotak)
+const SNAKES  = {49:28, 46:7,  38:15, 31:9,  44:26};
+const LADDERS = {4:18,  8:30,  20:42, 13:35, 24:45};
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 //  SOAL BANK
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 const BANK_PG = [
-  {q:"Apa yang dimaksud dengan buku fiksi?",choices:["Buku berisi fakta nyata","Buku berisi cerita karangan/imajinasi","Buku petunjuk teknis","Buku ilmu pengetahuan"],ans:1,kunci:"Buku fiksi adalah buku yang isinya bersumber dari imajinasi pengarang, bukan kejadian nyata."},
-  {q:"Berikut ini yang termasuk contoh buku fiksi adalah ...",choices:["Ensiklopedia","Novel","Kamus","Buku resep"],ans:1,kunci:"Novel merupakan karya sastra fiksi berbentuk prosa panjang."},
-  {q:"Buku nonfiksi berisi ...",choices:["Cerita rekaan","Imajinasi pengarang","Informasi berdasarkan fakta dan kenyataan","Dongeng dan legenda"],ans:2,kunci:"Buku nonfiksi berisi fakta, data, atau informasi yang dapat dipertanggungjawabkan kebenarannya."},
-  {q:"Unsur intrinsik dalam karya fiksi meliputi ...",choices:["Penulis, penerbit, tahun terbit","Tema, alur, tokoh, latar, sudut pandang","Indeks, glosarium, daftar pustaka","Kata pengantar, daftar isi, lampiran"],ans:1,kunci:"Unsur intrinsik meliputi tema, alur, tokoh/penokohan, latar, sudut pandang, amanat, dan gaya bahasa."},
-  {q:"Latar belakang cerita (waktu, tempat, suasana) dalam fiksi disebut ...",choices:["Tema","Alur","Latar","Amanat"],ans:2,kunci:"Latar (setting) mencakup waktu, tempat, dan suasana terjadinya cerita."},
-  {q:"Pesan moral yang ingin disampaikan pengarang dalam cerita fiksi disebut ...",choices:["Tema","Plot","Amanat","Tokoh"],ans:2,kunci:"Amanat adalah pesan atau nilai moral yang ingin disampaikan pengarang melalui ceritanya."},
-  {q:"Urutan peristiwa dalam cerita fiksi disebut ...",choices:["Tema","Alur","Latar","Sudut pandang"],ans:1,kunci:"Alur (plot) adalah rangkaian peristiwa yang membentuk jalannya cerita."},
-  {q:"Contoh buku nonfiksi yang berisi kumpulan informasi tentang berbagai topik adalah ...",choices:["Novel","Komik","Ensiklopedia","Cerpen"],ans:2,kunci:"Ensiklopedia adalah referensi berisi informasi dari berbagai bidang ilmu."},
-  {q:"Buku yang berisi catatan kisah hidup nyata seseorang yang ditulis orang lain disebut ...",choices:["Biografi","Novel","Fabel","Mitos"],ans:0,kunci:"Biografi adalah buku yang menceritakan kisah hidup nyata seseorang yang ditulis oleh orang lain."},
-  {q:"Cerita pendek fiksi yang menampilkan tokoh hewan dengan pesan moral disebut ...",choices:["Legenda","Fabel","Anekdot","Roman"],ans:1,kunci:"Fabel adalah cerita fiksi dengan tokoh utama hewan yang berperilaku seperti manusia dan mengandung nilai moral."},
-  {q:"Sudut pandang orang pertama ditandai dengan penggunaan kata ...",choices:["Dia","Mereka","Aku/Saya","Kalian"],ans:2,kunci:"Sudut pandang orang pertama menggunakan kata ganti 'aku' atau 'saya' sebagai narator."},
-  {q:"Bagian awal cerita yang memperkenalkan tokoh dan latar disebut ...",choices:["Klimaks","Resolusi","Orientasi","Koda"],ans:2,kunci:"Orientasi adalah bagian pembuka cerita yang memperkenalkan tokoh, waktu, dan tempat."},
-  {q:"Puncak ketegangan dalam sebuah cerita fiksi disebut ...",choices:["Orientasi","Klimaks","Koda","Resolusi"],ans:1,kunci:"Klimaks adalah titik puncak konflik atau ketegangan dalam sebuah cerita."},
-  {q:"Buku yang ditulis seseorang tentang kisah hidupnya sendiri disebut ...",choices:["Biografi","Autobiografi","Memoar","Legenda"],ans:1,kunci:"Autobiografi ditulis sendiri oleh tokoh yang bersangkutan tentang kisah hidupnya."},
-  {q:"Cerita rakyat yang menjelaskan asal-usul suatu tempat atau benda disebut ...",choices:["Fabel","Dongeng","Legenda","Mitos"],ans:2,kunci:"Legenda adalah cerita rakyat yang berhubungan dengan asal-usul suatu tempat, benda, atau peristiwa."},
-  {q:"Dalam cerita fiksi, tokoh yang memiliki sifat jahat/menentang protagonist disebut ...",choices:["Protagonis","Tritagonis","Antagonis","Figuran"],ans:2,kunci:"Antagonis adalah tokoh yang berperan sebagai lawan atau penghambat protagonis dalam cerita."},
-  {q:"Berikut ini yang bukan ciri-ciri buku nonfiksi adalah ...",choices:["Menggunakan bahasa baku","Berisi fakta","Memiliki alur cerita rekaan","Dapat dipertanggungjawabkan"],ans:2,kunci:"Alur cerita rekaan merupakan ciri khas buku fiksi, bukan nonfiksi."},
-  {q:"Tokoh utama yang umumnya memiliki sifat baik dalam cerita disebut ...",choices:["Antagonis","Tritagonis","Protagonis","Figuran"],ans:2,kunci:"Protagonis adalah tokoh utama yang menjadi pusat cerita dan umumnya memiliki sifat baik."},
-  {q:"Buku pelajaran, kamus, dan atlas termasuk jenis buku ...",choices:["Fiksi","Nonfiksi","Fiksi ilmiah","Antologi"],ans:1,kunci:"Buku pelajaran, kamus, dan atlas adalah buku nonfiksi yang berisi informasi faktual."},
-  {q:"Rangkuman singkat isi sebuah buku disebut ...",choices:["Epilog","Sinopsis","Indeks","Glosarium"],ans:1,kunci:"Sinopsis adalah ringkasan singkat yang menggambarkan isi keseluruhan sebuah buku."},
-  {q:"Alur cerita dari perkenalan, konflik, klimaks, lalu penyelesaian disebut ...",choices:["Alur maju","Alur mundur","Alur campuran","Alur bebas"],ans:0,kunci:"Alur maju (kronologis) adalah alur yang bergerak dari awal hingga akhir secara berurutan."},
-  {q:"Karya fiksi berbentuk prosa panjang yang biasanya mengisahkan perjalanan hidup disebut ...",choices:["Cerpen","Fabel","Roman/Novel","Drama"],ans:2,kunci:"Roman atau novel adalah karya fiksi prosa panjang yang sering mengisahkan perjalanan hidup tokoh."},
-  {q:"Daftar kata sulit beserta penjelasannya di akhir buku disebut ...",choices:["Indeks","Sinopsis","Glosarium","Daftar pustaka"],ans:2,kunci:"Glosarium adalah daftar kata-kata sulit atau istilah khusus yang dilengkapi penjelasan maknanya."},
-  {q:"Cerita fiksi yang menceritakan kejadian yang dialami satu tokoh dan sangat singkat disebut ...",choices:["Novel","Cerpen","Roman","Drama"],ans:1,kunci:"Cerpen (cerita pendek) adalah karya fiksi yang singkat, biasanya mengisahkan satu peristiwa utama."},
-  {q:"Karya sastra yang ditulis dalam bentuk dialog dan dimaksudkan untuk dipentaskan disebut ...",choices:["Cerpen","Puisi","Drama","Roman"],ans:2,kunci:"Drama adalah karya sastra berbentuk dialog yang dirancang untuk dipentaskan di atas panggung."},
+  {q:"Apa yang dimaksud dengan buku fiksi?",ch:["Buku berisi fakta nyata","Buku berisi cerita karangan/imajinasi","Buku petunjuk teknis","Buku ilmu pengetahuan"],ans:1,k:"Buku fiksi berisi cerita yang bersumber dari imajinasi pengarang, bukan kejadian nyata."},
+  {q:"Berikut ini yang termasuk contoh buku fiksi adalah ...",ch:["Ensiklopedia","Novel","Kamus","Buku resep"],ans:1,k:"Novel merupakan karya sastra fiksi berbentuk prosa panjang."},
+  {q:"Buku nonfiksi berisi ...",ch:["Cerita rekaan","Imajinasi pengarang","Informasi berdasarkan fakta dan kenyataan","Dongeng dan legenda"],ans:2,k:"Buku nonfiksi berisi fakta, data, atau informasi yang dapat dipertanggungjawabkan."},
+  {q:"Unsur intrinsik dalam karya fiksi meliputi ...",ch:["Penulis, penerbit, tahun terbit","Tema, alur, tokoh, latar, sudut pandang","Indeks, glosarium, daftar pustaka","Kata pengantar, daftar isi, lampiran"],ans:1,k:"Unsur intrinsik meliputi tema, alur, tokoh/penokohan, latar, sudut pandang, amanat, dan gaya bahasa."},
+  {q:"Latar belakang cerita (waktu, tempat, suasana) dalam fiksi disebut ...",ch:["Tema","Alur","Latar","Amanat"],ans:2,k:"Latar (setting) mencakup waktu, tempat, dan suasana terjadinya cerita."},
+  {q:"Pesan moral yang ingin disampaikan pengarang dalam cerita fiksi disebut ...",ch:["Tema","Plot","Amanat","Tokoh"],ans:2,k:"Amanat adalah pesan atau nilai moral yang ingin disampaikan pengarang melalui ceritanya."},
+  {q:"Urutan peristiwa dalam cerita fiksi disebut ...",ch:["Tema","Alur","Latar","Sudut pandang"],ans:1,k:"Alur (plot) adalah rangkaian peristiwa yang membentuk jalannya cerita."},
+  {q:"Contoh buku nonfiksi yang berisi kumpulan informasi berbagai topik adalah ...",ch:["Novel","Komik","Ensiklopedia","Cerpen"],ans:2,k:"Ensiklopedia adalah referensi berisi informasi dari berbagai bidang ilmu."},
+  {q:"Buku yang berisi kisah hidup nyata seseorang yang ditulis orang lain disebut ...",ch:["Biografi","Novel","Fabel","Mitos"],ans:0,k:"Biografi adalah buku yang menceritakan kisah hidup nyata seseorang yang ditulis oleh orang lain."},
+  {q:"Cerita pendek fiksi yang menampilkan tokoh hewan dengan pesan moral disebut ...",ch:["Legenda","Fabel","Anekdot","Roman"],ans:1,k:"Fabel adalah cerita fiksi dengan tokoh utama hewan yang berperilaku seperti manusia."},
+  {q:"Sudut pandang orang pertama ditandai dengan penggunaan kata ...",ch:["Dia","Mereka","Aku/Saya","Kalian"],ans:2,k:"Sudut pandang orang pertama menggunakan kata ganti 'aku' atau 'saya' sebagai narator."},
+  {q:"Bagian awal cerita yang memperkenalkan tokoh dan latar disebut ...",ch:["Klimaks","Resolusi","Orientasi","Koda"],ans:2,k:"Orientasi adalah bagian pembuka cerita yang memperkenalkan tokoh, waktu, dan tempat."},
+  {q:"Puncak ketegangan dalam sebuah cerita fiksi disebut ...",ch:["Orientasi","Klimaks","Koda","Resolusi"],ans:1,k:"Klimaks adalah titik puncak konflik atau ketegangan dalam sebuah cerita."},
+  {q:"Buku yang ditulis seseorang tentang kisah hidupnya sendiri disebut ...",ch:["Biografi","Autobiografi","Memoar","Legenda"],ans:1,k:"Autobiografi ditulis sendiri oleh tokoh yang bersangkutan tentang kisah hidupnya."},
+  {q:"Cerita rakyat yang menjelaskan asal-usul suatu tempat atau benda disebut ...",ch:["Fabel","Dongeng","Legenda","Mitos"],ans:2,k:"Legenda adalah cerita rakyat yang berhubungan dengan asal-usul suatu tempat, benda, atau peristiwa."},
+  {q:"Dalam cerita fiksi, tokoh yang menentang protagonis disebut ...",ch:["Protagonis","Tritagonis","Antagonis","Figuran"],ans:2,k:"Antagonis adalah tokoh yang berperan sebagai lawan atau penghambat protagonis dalam cerita."},
+  {q:"Yang bukan ciri-ciri buku nonfiksi adalah ...",ch:["Menggunakan bahasa baku","Berisi fakta","Memiliki alur cerita rekaan","Dapat dipertanggungjawabkan"],ans:2,k:"Alur cerita rekaan merupakan ciri khas buku fiksi, bukan nonfiksi."},
+  {q:"Tokoh utama yang umumnya memiliki sifat baik dalam cerita disebut ...",ch:["Antagonis","Tritagonis","Protagonis","Figuran"],ans:2,k:"Protagonis adalah tokoh utama yang menjadi pusat cerita dan umumnya memiliki sifat baik."},
+  {q:"Buku pelajaran, kamus, dan atlas termasuk jenis buku ...",ch:["Fiksi","Nonfiksi","Fiksi ilmiah","Antologi"],ans:1,k:"Buku pelajaran, kamus, dan atlas adalah buku nonfiksi yang berisi informasi faktual."},
+  {q:"Rangkuman singkat isi sebuah buku disebut ...",ch:["Epilog","Sinopsis","Indeks","Glosarium"],ans:1,k:"Sinopsis adalah ringkasan singkat yang menggambarkan isi keseluruhan sebuah buku."},
+  {q:"Alur cerita dari perkenalan hingga penyelesaian secara urut disebut ...",ch:["Alur maju","Alur mundur","Alur campuran","Alur bebas"],ans:0,k:"Alur maju (kronologis) adalah alur yang bergerak dari awal hingga akhir secara berurutan."},
+  {q:"Karya fiksi prosa panjang yang mengisahkan perjalanan hidup disebut ...",ch:["Cerpen","Fabel","Roman/Novel","Drama"],ans:2,k:"Roman atau novel adalah karya fiksi prosa panjang yang sering mengisahkan perjalanan hidup tokoh."},
+  {q:"Daftar kata sulit beserta penjelasannya di akhir buku disebut ...",ch:["Indeks","Sinopsis","Glosarium","Daftar pustaka"],ans:2,k:"Glosarium adalah daftar kata-kata sulit atau istilah khusus beserta penjelasan maknanya."},
+  {q:"Cerita fiksi singkat yang biasanya mengisahkan satu peristiwa utama disebut ...",ch:["Novel","Cerpen","Roman","Drama"],ans:1,k:"Cerpen (cerita pendek) adalah karya fiksi yang singkat, biasanya mengisahkan satu peristiwa utama."},
+  {q:"Karya sastra berbentuk dialog yang dimaksudkan untuk dipentaskan disebut ...",ch:["Cerpen","Puisi","Drama","Roman"],ans:2,k:"Drama adalah karya sastra berbentuk dialog yang dirancang untuk dipentaskan di atas panggung."},
 ];
 
 const BANK_ESSAY = [
-  {q:"Jelaskan perbedaan utama antara buku fiksi dan buku nonfiksi! Berikan masing-masing satu contoh.",kunci:"Fiksi = cerita rekaan/imajinasi (contoh: novel, cerpen). Nonfiksi = fakta nyata yang dapat dipertanggungjawabkan (contoh: ensiklopedia, buku pelajaran)."},
-  {q:"Sebutkan dan jelaskan 3 unsur intrinsik yang terdapat dalam cerita fiksi!",kunci:"Tema (pokok pikiran dasar cerita), Alur/Plot (urutan peristiwa cerita), Tokoh/Penokohan (pelaku cerita beserta karakternya). Bisa juga latar, sudut pandang, amanat, gaya bahasa."},
-  {q:"Apa yang dimaksud dengan alur maju, alur mundur, dan alur campuran dalam cerita fiksi?",kunci:"Alur maju: kronologis dari awal ke akhir. Alur mundur (flashback): dimulai dari masa kini ke masa lalu. Alur campuran: perpaduan keduanya."},
-  {q:"Mengapa buku nonfiksi harus menggunakan data dan fakta yang dapat dipertanggungjawabkan?",kunci:"Agar informasi yang disampaikan benar dan tidak menyesatkan pembaca, menjaga kredibilitas penulis, dan memungkinkan verifikasi oleh pihak lain."},
-  {q:"Jelaskan apa yang dimaksud dengan penokohan dalam cerita fiksi dan sebutkan cara pengarang menggambarkan watak tokoh!",kunci:"Penokohan adalah cara pengarang mengembangkan karakter tokoh. Cara: (1) langsung/analitik – pengarang langsung mendeskripsikan; (2) tidak langsung/dramatik – melalui dialog, tindakan, reaksi tokoh lain."},
-  {q:"Sebutkan ciri-ciri cerita fabel dan berikan contoh judul fabel yang kamu ketahui!",kunci:"Ciri fabel: tokoh utama hewan yang berperilaku seperti manusia, mengandung pesan moral, bersifat mendidik. Contoh: 'Kancil dan Buaya', 'Si Kura-kura dan Kelinci'."},
-  {q:"Apa perbedaan antara biografi dan autobiografi? Berikan contoh masing-masing!",kunci:"Biografi: ditulis oleh orang lain tentang seseorang (contoh: biografi Soekarno). Autobiografi: ditulis sendiri oleh tokohnya (contoh: 'Kisah Hidupku' karangan tokoh itu sendiri)."},
-  {q:"Jelaskan fungsi sinopsis pada sebuah buku!",kunci:"Sinopsis memberikan gambaran singkat isi buku kepada pembaca sehingga mereka bisa memutuskan apakah buku sesuai minat sebelum membacanya secara keseluruhan."},
-  {q:"Apa yang dimaksud dengan sudut pandang dalam cerita fiksi? Sebutkan jenisnya!",kunci:"Sudut pandang adalah posisi pengarang dalam menyampaikan cerita. Jenis: (1) orang pertama (aku/saya); (2) orang ketiga (dia/mereka); (3) orang ketiga mahatahu."},
-  {q:"Mengapa membaca buku fiksi dan nonfiksi sama-sama penting bagi siswa?",kunci:"Fiksi: melatih imajinasi, kreativitas, empati, kemampuan berbahasa. Nonfiksi: menambah pengetahuan dan wawasan faktual. Keduanya saling melengkapi dalam mengembangkan kemampuan berpikir."},
-  {q:"Jelaskan struktur cerita pendek (cerpen) secara lengkap!",kunci:"(1) Orientasi – pengenalan tokoh dan latar; (2) Komplikasi – munculnya konflik; (3) Klimaks – puncak konflik; (4) Resolusi – penyelesaian masalah; (5) Koda – penutup/pesan moral (opsional)."},
-  {q:"Apa yang dimaksud dengan tema dalam cerita fiksi dan bagaimana cara menemukannya?",kunci:"Tema adalah pokok pikiran/ide dasar yang mendasari seluruh cerita. Cara menemukan: baca keseluruhan, perhatikan konflik utama, lihat apa yang paling sering dibahas, dan perhatikan amanat."},
-  {q:"Sebutkan dan jelaskan 3 jenis tokoh berdasarkan perannya dalam cerita fiksi!",kunci:"(1) Protagonis – tokoh utama baik; (2) Antagonis – tokoh penentang protagonis; (3) Tritagonis – tokoh penengah antara protagonis dan antagonis."},
-  {q:"Apa yang dimaksud dengan latar dalam cerita fiksi? Sebutkan jenis-jenis latar!",kunci:"Latar adalah keterangan waktu, tempat, dan suasana cerita. Jenis: (1) latar tempat; (2) latar waktu; (3) latar suasana."},
-  {q:"Mengapa sebuah buku nonfiksi perlu memiliki daftar pustaka?",kunci:"Untuk menunjukkan sumber informasi, membuktikan akurasi dan kejujuran ilmiah, memberi penghargaan kepada penulis asli, dan memungkinkan pembaca mencari informasi lebih lanjut."},
-  {q:"Jelaskan perbedaan antara legenda dan mitos sebagai karya fiksi tradisional!",kunci:"Legenda: cerita rakyat tentang asal-usul tempat/peristiwa yang dianggap pernah terjadi (contoh: Sangkuriang). Mitos: berkaitan dengan kepercayaan dewa-dewa/makhluk gaib dan bersifat sakral."},
-  {q:"Bagaimana cara membedakan fakta dan opini dalam sebuah teks nonfiksi? Berikan contoh!",kunci:"Fakta: dapat dibuktikan kebenarannya (contoh: 'Indonesia merdeka 17 Agustus 1945'). Opini: pandangan subjektif (contoh: 'Film ini film terbaik tahun ini'). Cara: cek apakah dapat diverifikasi."},
-  {q:"Sebutkan unsur-unsur yang biasanya ada dalam sebuah buku nonfiksi!",kunci:"Sampul, kata pengantar, daftar isi, bab/isi utama berisi fakta dan informasi, ilustrasi/gambar, glosarium, indeks, daftar pustaka."},
-  {q:"Apa yang dimaksud dengan amanat dalam cerita fiksi dan bagaimana cara penyampaiannya?",kunci:"Amanat adalah pesan moral yang ingin disampaikan pengarang. Cara: (1) tersurat – langsung dinyatakan; (2) tersirat – melalui perilaku tokoh, dialog, atau peristiwa dalam cerita."},
-  {q:"Apa manfaat membaca buku bagi perkembangan diri seorang siswa?",kunci:"Menambah pengetahuan dan wawasan, meningkatkan kemampuan bahasa, melatih imajinasi dan kreativitas, mengembangkan kemampuan berpikir kritis, dan membentuk karakter lebih baik."},
-  {q:"Jelaskan apa yang dimaksud dengan gaya bahasa (majas) dalam karya sastra fiksi! Berikan satu contoh.",kunci:"Majas adalah cara pengungkapan pikiran dengan bahasa khas yang memperindah karya sastra. Contoh: Personifikasi ('Angin berbisik membelai rambutku'), Metafora ('Dia adalah cahaya hidupku')."},
-  {q:"Apa yang dimaksud dengan konflik dalam cerita fiksi? Sebutkan jenisnya!",kunci:"Konflik adalah pertentangan/masalah yang menggerakkan alur. Jenis: (1) konflik internal (dalam diri tokoh); (2) konflik eksternal (dengan tokoh lain, alam, atau masyarakat)."},
-  {q:"Bagaimana cara menentukan nilai/amanat yang terkandung dalam sebuah cerita fiksi?",kunci:"(1) Baca cerita keseluruhan; (2) Perhatikan konflik dan cara tokoh menghadapinya; (3) Cermati dialog dan perubahan tokoh; (4) Renungkan pesan dari keseluruhan peristiwa cerita."},
-  {q:"Jelaskan apa fungsi kata pengantar dalam sebuah buku nonfiksi!",kunci:"Menjelaskan tujuan penulisan buku, ucapan terima kasih, gambaran singkat isi buku, dan konteks/latar belakang mengapa buku ditulis."},
-  {q:"Apa yang dimaksud dengan alur dalam cerita fiksi dan apa bedanya dengan urutan kronologis?",kunci:"Alur adalah rangkaian peristiwa yang terstruktur membentuk cerita. Berbeda dengan kronologis: alur tidak harus berurutan waktu – bisa mundur atau campuran – karena yang penting adalah hubungan sebab-akibat antar peristiwa."},
+  {q:"Jelaskan perbedaan utama antara buku fiksi dan buku nonfiksi! Berikan masing-masing satu contoh.",k:"Fiksi = cerita rekaan/imajinasi (contoh: novel, cerpen). Nonfiksi = fakta nyata yang dapat dipertanggungjawabkan (contoh: ensiklopedia, buku pelajaran)."},
+  {q:"Sebutkan dan jelaskan 3 unsur intrinsik yang terdapat dalam cerita fiksi!",k:"Tema (pokok pikiran dasar cerita), Alur/Plot (urutan peristiwa cerita), Tokoh/Penokohan (pelaku cerita beserta karakternya). Bisa juga latar, sudut pandang, amanat, gaya bahasa."},
+  {q:"Apa yang dimaksud dengan alur maju, alur mundur, dan alur campuran dalam cerita fiksi?",k:"Alur maju: kronologis dari awal ke akhir. Alur mundur (flashback): dimulai dari masa kini ke masa lalu. Alur campuran: perpaduan keduanya."},
+  {q:"Mengapa buku nonfiksi harus menggunakan data dan fakta yang dapat dipertanggungjawabkan?",k:"Agar informasi yang disampaikan benar, tidak menyesatkan pembaca, menjaga kredibilitas penulis, dan memungkinkan verifikasi oleh pihak lain."},
+  {q:"Jelaskan apa yang dimaksud dengan penokohan dan sebutkan cara pengarang menggambarkan watak tokoh!",k:"Penokohan adalah cara pengarang mengembangkan karakter tokoh. Cara: (1) langsung/analitik – pengarang langsung mendeskripsikan; (2) tidak langsung/dramatik – melalui dialog, tindakan, reaksi tokoh lain."},
+  {q:"Sebutkan ciri-ciri cerita fabel dan berikan contoh judul fabel yang kamu ketahui!",k:"Ciri fabel: tokoh utama hewan yang berperilaku seperti manusia, mengandung pesan moral, bersifat mendidik. Contoh: 'Kancil dan Buaya', 'Si Kura-kura dan Kelinci'."},
+  {q:"Apa perbedaan antara biografi dan autobiografi? Berikan contoh masing-masing!",k:"Biografi: ditulis oleh orang lain tentang seseorang. Autobiografi: ditulis sendiri oleh tokohnya."},
+  {q:"Jelaskan fungsi sinopsis pada sebuah buku!",k:"Sinopsis memberikan gambaran singkat isi buku kepada pembaca sehingga mereka bisa memutuskan apakah buku sesuai minat mereka sebelum membacanya secara keseluruhan."},
+  {q:"Apa yang dimaksud dengan sudut pandang dalam cerita fiksi? Sebutkan jenisnya!",k:"Sudut pandang adalah posisi pengarang menyampaikan cerita. Jenis: (1) orang pertama (aku/saya); (2) orang ketiga (dia/mereka); (3) orang ketiga mahatahu."},
+  {q:"Mengapa membaca buku fiksi dan nonfiksi sama-sama penting bagi siswa?",k:"Fiksi: melatih imajinasi, kreativitas, empati, kemampuan berbahasa. Nonfiksi: menambah pengetahuan dan wawasan faktual. Keduanya saling melengkapi."},
+  {q:"Jelaskan struktur cerita pendek (cerpen) secara lengkap!",k:"(1) Orientasi – pengenalan tokoh dan latar; (2) Komplikasi – munculnya konflik; (3) Klimaks – puncak konflik; (4) Resolusi – penyelesaian masalah; (5) Koda – penutup/pesan moral (opsional)."},
+  {q:"Apa yang dimaksud dengan tema dalam cerita fiksi dan bagaimana cara menemukannya?",k:"Tema adalah pokok pikiran/ide dasar yang mendasari seluruh cerita. Cara menemukan: baca keseluruhan, perhatikan konflik utama, lihat apa yang paling sering dibahas."},
+  {q:"Sebutkan dan jelaskan 3 jenis tokoh berdasarkan perannya dalam cerita fiksi!",k:"(1) Protagonis – tokoh utama baik; (2) Antagonis – tokoh penentang protagonis; (3) Tritagonis – tokoh penengah antara protagonis dan antagonis."},
+  {q:"Apa yang dimaksud dengan latar dalam cerita fiksi? Sebutkan jenis-jenis latar!",k:"Latar adalah keterangan waktu, tempat, dan suasana cerita. Jenis: (1) latar tempat; (2) latar waktu; (3) latar suasana."},
+  {q:"Mengapa sebuah buku nonfiksi perlu memiliki daftar pustaka?",k:"Untuk menunjukkan sumber informasi, membuktikan akurasi dan kejujuran ilmiah, memberi penghargaan kepada penulis asli, dan memungkinkan pembaca mencari informasi lebih lanjut."},
+  {q:"Jelaskan perbedaan antara legenda dan mitos sebagai karya fiksi tradisional!",k:"Legenda: cerita rakyat tentang asal-usul tempat/peristiwa yang dianggap pernah terjadi (contoh: Sangkuriang). Mitos: berkaitan dengan kepercayaan dewa-dewa/makhluk gaib dan bersifat sakral."},
+  {q:"Bagaimana cara membedakan fakta dan opini dalam teks nonfiksi? Berikan contoh!",k:"Fakta: dapat dibuktikan kebenarannya (contoh: 'Indonesia merdeka 17 Agustus 1945'). Opini: pandangan subjektif (contoh: 'Film ini film terbaik tahun ini')."},
+  {q:"Sebutkan unsur-unsur yang biasanya ada dalam sebuah buku nonfiksi!",k:"Sampul, kata pengantar, daftar isi, bab/isi utama, ilustrasi/gambar, glosarium, indeks, daftar pustaka."},
+  {q:"Apa yang dimaksud dengan amanat dalam cerita fiksi dan bagaimana cara penyampaiannya?",k:"Amanat adalah pesan moral yang ingin disampaikan pengarang. Cara: (1) tersurat – langsung dinyatakan; (2) tersirat – melalui perilaku tokoh, dialog, atau peristiwa."},
+  {q:"Apa manfaat membaca buku bagi perkembangan diri seorang siswa?",k:"Menambah pengetahuan, meningkatkan kemampuan bahasa, melatih imajinasi dan kreativitas, mengembangkan kemampuan berpikir kritis, dan membentuk karakter lebih baik."},
+  {q:"Jelaskan apa yang dimaksud dengan gaya bahasa (majas) dalam karya sastra fiksi! Berikan satu contoh.",k:"Majas adalah cara pengungkapan pikiran dengan bahasa khas yang memperindah karya sastra. Contoh: Personifikasi ('Angin berbisik membelai rambutku'), Metafora ('Dia adalah cahaya hidupku')."},
+  {q:"Apa yang dimaksud dengan konflik dalam cerita fiksi? Sebutkan jenisnya!",k:"Konflik adalah pertentangan/masalah yang menggerakkan alur. Jenis: (1) konflik internal (dalam diri tokoh); (2) konflik eksternal (dengan tokoh lain, alam, atau masyarakat)."},
+  {q:"Bagaimana cara menentukan amanat yang terkandung dalam sebuah cerita fiksi?",k:"(1) Baca cerita keseluruhan; (2) Perhatikan konflik dan cara tokoh menghadapinya; (3) Cermati dialog dan perubahan tokoh; (4) Renungkan pesan dari keseluruhan peristiwa cerita."},
+  {q:"Jelaskan fungsi kata pengantar dalam sebuah buku nonfiksi!",k:"Menjelaskan tujuan penulisan buku, ucapan terima kasih, gambaran singkat isi buku, dan konteks/latar belakang mengapa buku ditulis."},
+  {q:"Apa yang dimaksud dengan alur dalam cerita fiksi dan apa bedanya dengan urutan kronologis?",k:"Alur adalah rangkaian peristiwa yang terstruktur membentuk cerita. Berbeda dengan kronologis: alur tidak harus berurutan waktu – bisa mundur atau campuran – karena yang penting adalah hubungan sebab-akibat antar peristiwa."},
 ];
 
-// ════════════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════════════
-let db = null;
-let useFirebase = false;
-let gameRef = null;
-
-let gameState = {
-  started: false,
-  groups: [], // {name, color, pos, soalList[{type,soalIdx,answered}], cursor}
-  currentTurn: 0,
-  currentSoal: null, // {groupIdx, soalRef, type, ...}
-  soalAnswered: null, // {answer, correct}
-  winner: null,
-  totalSoal: 0,
-  answeredCount: 0,
-};
-
-let myGroupIdx = null; // for murid
-let timerInterval = null;
-
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 //  FIREBASE
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
+let db = null, gameRef = null, useFirebase = false;
+
 function initFirebase() {
   try {
-    if (!FIREBASE_CONFIG.databaseURL) {
-      console.log('Firebase not configured — local mode');
-      document.getElementById('fbConfigWarning').style.display = 'block';
-      return;
-    }
+    if (!FIREBASE_CONFIG.databaseURL) return;
     firebase.initializeApp(FIREBASE_CONFIG);
     db = firebase.database();
-    gameRef = db.ref('ulartangga_game');
+    gameRef = db.ref('ulartangga_v2');
     useFirebase = true;
-    setupFirebaseListeners();
-    console.log('Firebase connected!');
-  } catch(e) {
-    console.warn('Firebase init failed:', e);
+    gameRef.on('value', snap => {
+      const d = snap.val();
+      if (!d) return;
+      const prev = JSON.stringify(GS);
+      GS = d;
+      const cur = JSON.stringify(GS);
+      if (prev !== cur) onStateChange();
+    });
+    console.log('Firebase OK');
+  } catch(e) { console.warn('Firebase:', e); }
+}
+
+function push() {
+  if (useFirebase && gameRef) gameRef.set(GS);
+}
+
+// ═══════════════════════════
+//  GAME STATE
+// ═══════════════════════════
+let GS = {
+  started: false,
+  groups: [],         // [{name,color,pos,soalList,cursor}]
+  soalIdx: 0,         // global soal counter (which soal round we're on)
+  currentSoal: null,  // {soalBankType, soalBankIdx, q, ch, ans, k, timerMax, timerStart, status, groupSoalIdx[]}
+  answers: {},        // {groupIdx: {answer, correct, time}}  for current soal
+  essayPending: [],   // [groupIdx] still need guru to judge
+  results: null,      // computed after all answered
+  winner: null,
+  totalSoal: 0,
+  answeredTotal: 0,
+};
+
+let myGroup = null;   // murid's group index
+let timerIv = null, muridTimerIv = null;
+let ctx = null;
+let assignedSoal = [];
+
+// ═══════════════════════════
+//  STATE CHANGE (Firebase listener)
+// ═══════════════════════════
+function onStateChange() {
+  const guruGameOn = document.getElementById('guruGame').classList.contains('on');
+  const muridGameOn = document.getElementById('muridGame').classList.contains('on');
+  const muridPilihOn = document.getElementById('muridPilih').classList.contains('on');
+
+  if (guruGameOn) { renderBoard(); updateGuruPanel(); }
+  if (muridPilihOn && GS.started) { /* could auto-advance to game */ }
+  if (muridGameOn) updateMuridView();
+  if (GS.winner !== null && GS.winner !== undefined && !document.getElementById('winnerScreen').classList.contains('on')) {
+    showWinner();
   }
 }
 
-function setupFirebaseListeners() {
-  if (!gameRef) return;
-  gameRef.on('value', snap => {
-    const data = snap.val();
-    if (!data) return;
-    const prev = gameState.started;
-    gameState = { ...gameState, ...data };
-    // Render updates
-    if (document.getElementById('guruGame').classList.contains('on')) {
-      renderBoard();
-      updateGuruSidebar();
-    }
-    if (document.getElementById('muridGame').classList.contains('on')) {
-      updateMuridView();
-    }
-    if (data.winner && !prev) {
-      showWinner();
-    }
-  });
-}
-
-function pushState() {
-  if (useFirebase && gameRef) {
-    gameRef.set(gameState);
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  SCREEN NAV
-// ════════════════════════════════════════════════════════
-function showScreen(id) {
+// ═══════════════════════════
+//  SCREENS
+// ═══════════════════════════
+function ss(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
 }
 
 function goGuru() {
-  document.getElementById('guruPinInput').value = '';
-  document.getElementById('pinError').style.display = 'none';
-  document.getElementById('guruPinOverlay').classList.add('open');
+  document.getElementById('pinInput').value = '';
+  document.getElementById('pinErr').style.display = 'none';
+  document.getElementById('pinOverlay').classList.add('open');
 }
-
-function checkGuruPin() {
-  const v = document.getElementById('guruPinInput').value;
-  if (v === GURU_PIN) {
-    closeOverlay('guruPinOverlay');
-    initGuruSetup();
-    showScreen('guruSetup');
+function checkPin() {
+  if (document.getElementById('pinInput').value === GURU_PIN) {
+    closeOv('pinOverlay');
+    initSetup();
+    ss('guruSetup');
   } else {
-    document.getElementById('pinError').style.display = 'block';
+    document.getElementById('pinErr').style.display = 'block';
   }
 }
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
 
 function goMurid() {
-  showScreen('muridPilih');
+  ss('muridPilih');
   renderGroupPick();
-  if (gameState.started) {
-    document.getElementById('gameNotStarted').style.display = 'none';
-  } else {
-    document.getElementById('gameNotStarted').style.display = 'block';
-  }
+  if (!GS.started) document.getElementById('gameNotYet').style.display = 'block';
+  else document.getElementById('gameNotYet').style.display = 'none';
 }
 
-function closeOverlay(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// ════════════════════════════════════════════════════════
-//  GURU SETUP
-// ════════════════════════════════════════════════════════
-let assignedSoal = []; // [groupIdx] = [{type, soalIdx}]
-
-function initGuruSetup() {
-  // Render group inputs
-  const cont = document.getElementById('groupInputsSetup');
+// ═══════════════════════════
+//  SETUP
+// ═══════════════════════════
+function initSetup() {
+  const cont = document.getElementById('gnamesSetup');
   cont.innerHTML = '';
   for (let i = 0; i < 5; i++) {
     const row = document.createElement('div');
-    row.className = 'group-row';
-    row.innerHTML = `
-      <div class="group-dot" style="background:${GROUP_COLORS[i]}"></div>
-      <input type="text" placeholder="${GROUP_NAMES_DEFAULT[i]}" id="gname_${i}" value="${gameState.groups[i]?.name || ''}">
-    `;
+    row.className = 'grow';
+    row.innerHTML = `<div class="gdot" style="background:${GROUP_COLORS[i]}"></div>
+      <input type="text" id="gn${i}" placeholder="${GROUP_DEF[i]}" value="${GS.groups[i]?.name||''}">`;
     cont.appendChild(row);
   }
   acakSoal();
-  generateQR();
+  buildQR();
 }
 
-function getGroupNames() {
-  return Array.from({length:5}, (_,i) => {
-    const v = document.getElementById(`gname_${i}`)?.value.trim();
-    return v || GROUP_NAMES_DEFAULT[i];
+function getNames() {
+  return Array.from({length:5},(_,i)=>{
+    const v = document.getElementById(`gn${i}`)?.value.trim();
+    return v || GROUP_DEF[i];
   });
 }
 
 function acakSoal() {
   assignedSoal = [];
-  const pgPool = shuffle([...Array(BANK_PG.length).keys()]);
-  const essayPool = shuffle([...Array(BANK_ESSAY.length).keys()]);
-  const pgPerGroup = 5;
-  const essayPerGroup = 5;
-
+  const pg = shuffle([...Array(BANK_PG.length).keys()]);
+  const es = shuffle([...Array(BANK_ESSAY.length).keys()]);
   for (let g = 0; g < 5; g++) {
     const list = [];
-    for (let i = 0; i < pgPerGroup; i++) {
-      list.push({ type:'pg', soalIdx: pgPool[(g * pgPerGroup + i) % pgPool.length] });
-    }
-    for (let i = 0; i < essayPerGroup; i++) {
-      list.push({ type:'essay', soalIdx: essayPool[(g * essayPerGroup + i) % essayPool.length] });
-    }
+    for (let i = 0; i < 5; i++) list.push({type:'pg', idx: pg[(g*5+i)%pg.length]});
+    for (let i = 0; i < 5; i++) list.push({type:'essay', idx: es[(g*5+i)%es.length]});
     assignedSoal.push(shuffle(list));
   }
-
   renderSoalTable();
 }
 
 function renderSoalTable() {
-  const names = getGroupNames();
-  const tbody = document.getElementById('soalPreviewBody');
-  tbody.innerHTML = '';
-  let row = 0;
+  const names = getNames();
+  const tb = document.getElementById('soalTbody');
+  tb.innerHTML = '';
+  let n = 0;
   for (let g = 0; g < 5; g++) {
-    assignedSoal[g].forEach((s, si) => {
-      row++;
-      const soal = s.type === 'pg' ? BANK_PG[s.soalIdx] : BANK_ESSAY[s.soalIdx];
+    assignedSoal[g].forEach((s,si) => {
+      n++;
+      const soal = s.type==='pg' ? BANK_PG[s.idx] : BANK_ESSAY[s.idx];
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${row}</td>
-        <td><span class="badge-${s.type}">${s.type.toUpperCase()}</span></td>
-        <td style="max-width:280px;white-space:normal;">${soal.q.substring(0,80)}${soal.q.length>80?'...':''}</td>
-        <td style="white-space:nowrap;"><span class="group-dot" style="background:${GROUP_COLORS[g]};display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:middle;"></span>${names[g]}</td>
-      `;
-      tbody.appendChild(tr);
+      tr.innerHTML = `<td>${n}</td>
+        <td><span class="b${s.type==='pg'?'pg':'es'}">${s.type.toUpperCase()}</span></td>
+        <td style="max-width:260px;white-space:normal;">${soal.q.substring(0,75)}${soal.q.length>75?'...':''}</td>
+        <td style="white-space:nowrap;"><span style="background:${GROUP_COLORS[g]};width:9px;height:9px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:4px;"></span>${names[g]}</td>`;
+      tb.appendChild(tr);
     });
   }
 }
 
-function generateQR() {
+function buildQR() {
   const url = location.href;
-  document.getElementById('gameUrlDisplay').textContent = url;
-  const qrDiv = document.getElementById('qrcode');
-  qrDiv.innerHTML = '';
-  try {
-    new QRCode(qrDiv, {
-      text: url,
-      width: 160,
-      height: 160,
-      colorDark: '#e8f4fd',
-      colorLight: '#1a2d45',
-    });
-  } catch(e) { qrDiv.textContent = url; }
+  document.getElementById('gurlTxt').textContent = url;
+  const qd = document.getElementById('qrcode');
+  qd.innerHTML = '';
+  try { new QRCode(qd,{text:url,width:150,height:150,colorDark:'#e8f4fd',colorLight:'#1a2d45'}); }
+  catch(e) { qd.textContent = url; }
 }
 
-function copyGameUrl() {
-  navigator.clipboard?.writeText(location.href).then(() => showToast('Link disalin! 📋', 'info'));
+function copyUrl() {
+  navigator.clipboard?.writeText(location.href).then(()=>toast('Link disalin! 📋','info'));
 }
 
+// ═══════════════════════════
+//  MULAI GAME
+// ═══════════════════════════
 function mulaiGame() {
-  const names = getGroupNames();
-  gameState.groups = Array.from({length:5}, (_,i) => ({
-    name: names[i],
-    color: GROUP_COLORS[i],
-    pos: 1,
-    soalList: assignedSoal[i],
-    cursor: 0,
-    answeredCount: 0,
+  const names = getNames();
+  GS.groups = Array.from({length:5},(_,i)=>({
+    name:names[i], color:GROUP_COLORS[i], pos:1,
+    soalList: assignedSoal[i], cursor:0,
   }));
-  gameState.started = true;
-  gameState.currentTurn = 0;
-  gameState.currentSoal = null;
-  gameState.winner = null;
-  gameState.answeredCount = 0;
-  gameState.totalSoal = 5 * SOAL_PER_GROUP;
-
-  pushState();
-  showScreen('guruGame');
-  setTimeout(() => {
-    initCanvas();
-    renderBoard();
-    updateGuruSidebar();
-    loadNextSoal();
-  }, 50);
+  GS.started = true;
+  GS.soalIdx = 0;
+  GS.currentSoal = null;
+  GS.answers = {};
+  GS.essayPending = [];
+  GS.results = null;
+  GS.winner = null;
+  GS.totalSoal = 50;
+  GS.answeredTotal = 0;
+  push();
+  ss('guruGame');
+  setTimeout(()=>{ initCanvas(); renderBoard(); updateGuruPanel(); }, 50);
 }
 
-// ════════════════════════════════════════════════════════
-//  CANVAS BOARD
-// ════════════════════════════════════════════════════════
-let ctx = null;
-
+// ═══════════════════════════
+//  CANVAS
+// ═══════════════════════════
 function initCanvas() {
-  const canvas = document.getElementById('boardCanvas');
-  const w = Math.min(canvas.parentElement.clientWidth - 24, 520);
-  canvas.width = w; canvas.height = w;
-  ctx = canvas.getContext('2d');
+  const c = document.getElementById('boardCanvas');
+  const w = Math.min(c.parentElement.clientWidth-20, 520);
+  c.width = w; c.height = w;
+  ctx = c.getContext('2d');
 }
 
-function cellToXY(cell) {
-  const N = 10; // 10 cols, 5 rows for 50 cells
-  const ROWS = 5;
-  const cs = ctx.canvas.width / N;
-  const rowH = ctx.canvas.height / ROWS;
-
-  const row = Math.floor((cell - 1) / N); // 0 = bottom
-  const col = (cell - 1) % N;
-  const dispRow = ROWS - 1 - row;
-  const dispCol = row % 2 === 0 ? col : N - 1 - col;
-  return {
-    x: dispCol * cs + cs / 2,
-    y: dispRow * rowH + rowH / 2,
-    cs, rh: rowH,
-  };
+function cell2xy(cell) {
+  const N=10, ROWS=5;
+  const W=ctx.canvas.width, H=ctx.canvas.height;
+  const cs=W/N, rh=H/ROWS;
+  const row=Math.floor((cell-1)/N), col=(cell-1)%N;
+  const dr=ROWS-1-row, dc=row%2===0?col:N-1-col;
+  return {x:dc*cs+cs/2, y:dr*rh+rh/2, cs, rh};
 }
 
 function renderBoard() {
   if (!ctx) return;
-  const canvas = ctx.canvas;
-  const W = canvas.width, H = canvas.height;
-  const N = 10, ROWS = 5;
-  const cs = W / N, rh = H / ROWS;
+  const c=ctx.canvas, W=c.width, H=c.height;
+  const N=10, ROWS=5, cs=W/N, rh=H/ROWS;
+  ctx.clearRect(0,0,W,H);
 
-  ctx.clearRect(0, 0, W, H);
-
-  // Cells
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < N; col++) {
-      const dispRow = ROWS - 1 - row;
-      const cellNum = row % 2 === 0 ? row * N + col + 1 : row * N + (N - col);
-      const x = col * cs, y = dispRow * rh;
-
-      ctx.fillStyle = (row + col) % 2 === 0 ? '#1e3a5f' : '#162d4a';
-      ctx.fillRect(x + 1, y + 1, cs - 2, rh - 2);
-
-      // Number
-      ctx.fillStyle = 'rgba(255,255,255,.2)';
-      ctx.font = `${Math.max(8, cs * 0.2)}px Nunito`;
-      ctx.textAlign = 'left';
-      ctx.fillText(cellNum, x + 3, y + rh * 0.28);
-
-      if (SNAKES[cellNum])  { ctx.font=`${cs*.3}px serif`; ctx.textAlign='center'; ctx.fillText('🐍', x+cs*.72, y+rh*.6); }
-      if (LADDERS[cellNum]) { ctx.font=`${cs*.3}px serif`; ctx.textAlign='center'; ctx.fillText('🪜', x+cs*.72, y+rh*.6); }
+  for (let row=0;row<ROWS;row++) {
+    for (let col=0;col<N;col++) {
+      const dr=ROWS-1-row;
+      const cn=row%2===0?row*N+col+1:row*N+(N-col);
+      const x=col*cs, y=dr*rh;
+      ctx.fillStyle=(row+col)%2===0?'#1e3a5f':'#162d4a';
+      ctx.fillRect(x+1,y+1,cs-2,rh-2);
+      ctx.fillStyle='rgba(255,255,255,.18)';
+      ctx.font=`${Math.max(7,cs*.18)}px Nunito`; ctx.textAlign='left';
+      ctx.fillText(cn, x+3, y+rh*.26);
+      if (SNAKES[cn])  {ctx.font=`${cs*.28}px serif`;ctx.textAlign='center';ctx.fillText('🐍',x+cs*.74,y+rh*.62);}
+      if (LADDERS[cn]) {ctx.font=`${cs*.28}px serif`;ctx.textAlign='center';ctx.fillText('🪜',x+cs*.74,y+rh*.62);}
     }
   }
+  for (const [f,t] of Object.entries(SNAKES))  { const a=cell2xy(+f),b=cell2xy(+t); drawCurve(a.x,a.y,b.x,b.y,'#ef476f',2.5); }
+  for (const [f,t] of Object.entries(LADDERS)) { const a=cell2xy(+f),b=cell2xy(+t); drawCurve(a.x,a.y,b.x,b.y,'#06d6a0',2.5); }
 
-  // Snakes
-  for (const [from, to] of Object.entries(SNAKES)) {
-    const a = cellToXY(+from), b = cellToXY(+to);
-    drawCurve(a.x, a.y, b.x, b.y, '#ef476f', 2.5);
-  }
-  // Ladders
-  for (const [from, to] of Object.entries(LADDERS)) {
-    const a = cellToXY(+from), b = cellToXY(+to);
-    drawCurve(a.x, a.y, b.x, b.y, '#06d6a0', 2.5);
-  }
+  ctx.strokeStyle='rgba(46,74,106,.45)'; ctx.lineWidth=1;
+  for(let i=0;i<=N;i++){ctx.beginPath();ctx.moveTo(i*cs,0);ctx.lineTo(i*cs,H);ctx.stroke();}
+  for(let i=0;i<=ROWS;i++){ctx.beginPath();ctx.moveTo(0,i*rh);ctx.lineTo(W,i*rh);ctx.stroke();}
 
-  // Grid
-  ctx.strokeStyle = 'rgba(46,74,106,.5)'; ctx.lineWidth = 1;
-  for (let i = 0; i <= N; i++) {
-    ctx.beginPath(); ctx.moveTo(i*cs, 0); ctx.lineTo(i*cs, H); ctx.stroke();
-  }
-  for (let i = 0; i <= ROWS; i++) {
-    ctx.beginPath(); ctx.moveTo(0, i*rh); ctx.lineTo(W, i*rh); ctx.stroke();
-  }
-
-  // Pieces
-  gameState.groups.forEach((g, gi) => {
-    if (!g) return;
-    const {x, y, cs, rh} = cellToXY(g.pos);
-    const offsets = [{dx:0,dy:0},{dx:.35,dy:0},{dx:0,dy:.35},{dx:.35,dy:.35},{dx:-.3,dy:-.3}];
-    const off = offsets[gi % 5];
-    const px = x + off.dx * cs * .5;
-    const py = y + off.dy * rh * .5;
-    const r = Math.min(cs, rh) * 0.17;
-
-    ctx.beginPath();
-    ctx.arc(px, py, r, 0, Math.PI*2);
-    ctx.fillStyle = g.color;
-    ctx.fill();
-    ctx.strokeStyle = '#0d1b2a'; ctx.lineWidth = 1.5; ctx.stroke();
-
-    ctx.fillStyle = '#111';
-    ctx.font = `bold ${Math.max(6, r*.9)}px Nunito`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText((g.name||'?')[0], px, py);
-    ctx.textBaseline = 'alphabetic';
+  GS.groups.forEach((g,gi)=>{
+    if(!g) return;
+    const {x,y,cs,rh}=cell2xy(g.pos);
+    const offs=[{dx:0,dy:0},{dx:.35,dy:0},{dx:0,dy:.35},{dx:.35,dy:.35},{dx:-.3,dy:-.3}];
+    const o=offs[gi%5];
+    const px=x+o.dx*cs*.5, py=y+o.dy*rh*.5;
+    const r=Math.min(cs,rh)*.17;
+    ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+    ctx.fillStyle=g.color; ctx.fill();
+    ctx.strokeStyle='#0d1b2a'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#111'; ctx.font=`bold ${Math.max(6,r*.9)}px Nunito`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText((g.name||'?')[0],px,py); ctx.textBaseline='alphabetic';
   });
 }
 
-function drawCurve(x1,y1,x2,y2,col,w) {
-  const mx=(x1+x2)/2, my=(y1+y2)/2;
-  const cx=mx+(y2-y1)*.25, cy=my-(x2-x1)*.25;
-  ctx.beginPath(); ctx.moveTo(x1,y1);
-  ctx.quadraticCurveTo(cx,cy,x2,y2);
-  ctx.strokeStyle=col; ctx.lineWidth=w; ctx.globalAlpha=.7; ctx.stroke(); ctx.globalAlpha=1;
+function drawCurve(x1,y1,x2,y2,col,w){
+  const mx=(x1+x2)/2,my=(y1+y2)/2;
+  const cx=mx+(y2-y1)*.25,cy=my-(x2-x1)*.25;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo(cx,cy,x2,y2);
+  ctx.strokeStyle=col;ctx.lineWidth=w;ctx.globalAlpha=.7;ctx.stroke();ctx.globalAlpha=1;
 }
 
-// ════════════════════════════════════════════════════════
-//  GURU SIDEBAR
-// ════════════════════════════════════════════════════════
-function updateGuruSidebar() {
-  const g = gameState.groups[gameState.currentTurn];
-  if (g) {
-    document.getElementById('turnPill').textContent = `🎯 Giliran: ${g.name}`;
-  }
-
+// ═══════════════════════════
+//  GURU PANEL
+// ═══════════════════════════
+function updateGuruPanel() {
   // Score rows
-  const cont = document.getElementById('scoreRows');
-  cont.innerHTML = gameState.groups.map((gr, i) => {
-    if (!gr) return '';
-    return `
-      <div class="score-row ${i === gameState.currentTurn ? 'active' : ''}">
-        <div class="sdot" style="background:${gr.color}"></div>
-        <div class="sname">${gr.name}</div>
-        <div class="spos">Kotak ${gr.pos}</div>
-      </div>`;
-  }).join('');
+  const sr = document.getElementById('scoreRows');
+  sr.innerHTML = GS.groups.map((g,i)=>`
+    <div class="srow">
+      <div class="sd" style="background:${g.color}"></div>
+      <div class="sn">${g.name}</div>
+      <div class="sp">Kotak ${g.pos}</div>
+    </div>`).join('');
 
-  // Progress dots for current group
-  const gCur = gameState.groups[gameState.currentTurn];
-  const qGrid = document.getElementById('qStatusGrid');
-  if (gCur) {
-    qGrid.innerHTML = gCur.soalList.map((s, i) => {
-      const col = i < gCur.cursor ? '#06d6a0' : i === gCur.cursor ? '#ffd166' : '#1e3a5a';
-      const size = s.type === 'essay' ? 14 : 10;
-      return `<div class="q-dot2" style="background:${col};width:${size}px;height:${size}px;" title="${s.type.toUpperCase()}"></div>`;
-    }).join('');
-  }
+  document.getElementById('qProg').textContent = `Soal ${GS.answeredTotal||0}/${GS.totalSoal||50}`;
 
-  // Soal progress
-  document.getElementById('soalProgress').textContent = `Soal ${gameState.answeredCount||0}/${gameState.totalSoal||50}`;
-
-  updateGuruSoalPanel();
-}
-
-function updateGuruSoalPanel() {
-  const cs = gameState.currentSoal;
-  const waitDiv = document.getElementById('waitAnswerDiv');
-  const essayDiv = document.getElementById('essayJudgeDiv');
-  const lanjutBtn = document.getElementById('btnLanjut');
+  const cs = GS.currentSoal;
+  const spanel = document.getElementById('guruSoalPanel');
+  const ejArea = document.getElementById('essayJudgeArea');
+  const btnL = document.getElementById('btnLempar');
+  const btnN = document.getElementById('btnLanjut');
 
   if (!cs) {
-    waitDiv.style.display = 'none';
-    essayDiv.style.display = 'none';
-    lanjutBtn.style.display = 'none';
+    spanel.style.display = 'none';
+    ejArea.style.display = 'none';
+    // Check if game over
+    const allDone = GS.groups.every(g=>g.cursor>=SOAL_PER_GROUP);
+    if (allDone) { showWinner(); return; }
+    btnL.style.display = 'flex';
+    btnN.style.display = 'none';
     return;
   }
 
-  if (cs.status === 'waiting') {
-    waitDiv.style.display = 'block';
-    essayDiv.style.display = 'none';
-    lanjutBtn.style.display = 'none';
+  spanel.style.display = 'block';
+  document.getElementById('gQNum').textContent = `Soal ${GS.answeredTotal+1}/${GS.totalSoal}`;
+  const pill = document.getElementById('gTypePill');
+  pill.textContent = cs.type==='pg' ? 'PG' : 'Essay';
+  pill.className = 'type-pill ' + (cs.type==='pg'?'tp-pg':'tp-es');
+  document.getElementById('gBobotTag').textContent = cs.type==='pg' ? '+3 kotak' : '+6 kotak';
+  document.getElementById('gQTxt').textContent = cs.q;
+
+  // Timer display
+  if (cs.status === 'active') {
+    btnL.style.display = 'none';
+    btnN.style.display = 'none';
+    startGuruTimer(cs);
+    updateAnsStatus();
   } else if (cs.status === 'essay_judge') {
-    waitDiv.style.display = 'none';
-    essayDiv.style.display = 'block';
-    lanjutBtn.style.display = 'none';
-    document.getElementById('essayAnswerShow').textContent = cs.muridAnswer || '(tidak dijawab)';
-    document.getElementById('essayKunciShow').textContent = '🔑 Kunci: ' + cs.kunci;
+    clearInterval(timerIv);
+    btnL.style.display = 'none';
+    btnN.style.display = 'none';
+    showEssayJudge();
   } else if (cs.status === 'done') {
-    waitDiv.style.display = 'none';
-    essayDiv.style.display = 'none';
-    lanjutBtn.style.display = 'block';
+    clearInterval(timerIv);
+    btnL.style.display = 'none';
+    btnN.style.display = 'flex';
+    showResults();
+    ejArea.style.display = 'none';
   }
 }
 
-// ════════════════════════════════════════════════════════
-//  SOAL FLOW
-// ════════════════════════════════════════════════════════
-function loadNextSoal() {
-  const g = gameState.groups[gameState.currentTurn];
-  if (!g) return;
-
-  // Check if all groups done
-  const allDone = gameState.groups.every(gr => gr.cursor >= SOAL_PER_GROUP);
-  if (allDone) { showWinner(); return; }
-
-  // Skip if this group done
-  if (g.cursor >= SOAL_PER_GROUP) {
-    nextTurn();
-    return;
-  }
-
-  const soalRef = g.soalList[g.cursor];
-  const bank = soalRef.type === 'pg' ? BANK_PG : BANK_ESSAY;
-  const soal = bank[soalRef.soalIdx];
-
-  gameState.currentSoal = {
-    groupIdx: gameState.currentTurn,
-    soalListIdx: g.cursor,
-    type: soalRef.type,
-    soalIdx: soalRef.soalIdx,
-    q: soal.q,
-    choices: soal.choices || null,
-    kunci: soal.kunci,
-    ans: soal.ans !== undefined ? soal.ans : null,
-    status: 'waiting',
-    muridAnswer: null,
-    timerMax: soalRef.type === 'pg' ? TIMER_PG : TIMER_ESSAY,
-    timerStarted: Date.now(),
+let guruTimerRunning = false;
+function startGuruTimer(cs) {
+  if (guruTimerRunning) return;
+  guruTimerRunning = true;
+  const doTick = () => {
+    const elapsed = (Date.now() - cs.timerStart) / 1000;
+    const rem = Math.max(0, cs.timerMax - elapsed);
+    const pct = (rem / cs.timerMax) * 100;
+    const fill = document.getElementById('gTimerFill');
+    const num = document.getElementById('gTimerNum');
+    if (fill) { fill.style.width=pct+'%'; fill.className='gtimer-bar-fill'+(pct<25?' danger':''); }
+    if (num) num.textContent = Math.ceil(rem);
+    if (rem<=0) { clearInterval(timerIv); guruTimerRunning=false; checkAllAnswered(); }
+    updateAnsStatus();
   };
-
-  pushState();
-  updateGuruSidebar();
-  renderBoard();
-
-  // Start guru-side timeout watch
-  clearInterval(timerInterval);
-  timerInterval = setInterval(checkTimeout, 1000);
+  clearInterval(timerIv);
+  timerIv = setInterval(doTick, 400);
+  doTick();
 }
 
-function checkTimeout() {
-  const cs = gameState.currentSoal;
-  if (!cs || cs.status !== 'waiting') { clearInterval(timerInterval); return; }
-  const elapsed = (Date.now() - cs.timerStarted) / 1000;
-  if (elapsed >= cs.timerMax) {
-    clearInterval(timerInterval);
-    // Timeout = wrong
-    processAnswer(false, true);
-  }
-}
-
-function judgeEssay(benar) {
-  processAnswer(benar, false);
-}
-
-function processAnswer(benar, timeout) {
-  const cs = gameState.currentSoal;
+function updateAnsStatus() {
+  const cs = GS.currentSoal;
   if (!cs) return;
-  const g = gameState.groups[cs.groupIdx];
-  const bobot = cs.type === 'essay' ? BOBOT_ESSAY : BOBOT_PG;
-  const delta = benar ? bobot : -DENDA;
+  const grid = document.getElementById('ansStatusGrid');
+  const answers = GS.answers || {};
+  let count = 0;
+  grid.innerHTML = GS.groups.map((g,i)=>{
+    // Find this group's soalListIdx for this round
+    const gSoalIdx = cs.groupSoalIdxMap ? cs.groupSoalIdxMap[i] : null;
+    const hasSoal = gSoalIdx !== null && gSoalIdx !== undefined;
+    if (!hasSoal) {
+      return `<div class="ans-status-item waiting"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}<br><small style="color:var(--tx2)">—</small></div>`;
+    }
+    const a = answers[i];
+    if (!a) {
+      return `<div class="ans-status-item waiting wpulse"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}<br><small>Mengetik...</small></div>`;
+    }
+    count++;
+    if (a.status==='answered' || a.status==='correct' || a.status==='wrong') {
+      return `<div class="ans-status-item answered"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}<br><small>✅ Terkirim</small></div>`;
+    }
+    return `<div class="ans-status-item waiting"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}</div>`;
+  }).join('');
+  const total = Object.values(cs.groupSoalIdxMap||{}).filter(v=>v!==null&&v!==undefined).length;
+  document.getElementById('ansCountTxt').textContent = `${Object.keys(answers).length}/${total} menjawab`;
+}
 
-  let newPos = Math.max(1, Math.min(TOTAL_CELLS, g.pos + delta));
-  g.pos = newPos;
+function checkAllAnswered() {
+  const cs = GS.currentSoal;
+  if (!cs || cs.status !== 'active') return;
+  const map = cs.groupSoalIdxMap || {};
+  const total = Object.values(map).filter(v=>v!==null&&v!==undefined).length;
+  const answered = Object.keys(GS.answers||{}).length;
+  if (answered >= total) processResults();
+}
 
-  // Snake / ladder
-  let special = null;
-  if (SNAKES[newPos]) { special = {type:'snake', from:newPos, to:SNAKES[newPos]}; g.pos = SNAKES[newPos]; }
-  else if (LADDERS[newPos]) { special = {type:'ladder', from:newPos, to:LADDERS[newPos]}; g.pos = LADDERS[newPos]; }
+function showEssayJudge() {
+  const ejArea = document.getElementById('essayJudgeArea');
+  const ejList = document.getElementById('essayJudgeList');
+  const pending = GS.essayPending || [];
+  if (pending.length === 0) { ejArea.style.display='none'; processResults(); return; }
+  ejArea.style.display = 'block';
+  ejList.innerHTML = pending.map(gi=>{
+    const g = GS.groups[gi];
+    const ans = GS.answers?.[gi]?.answer || '(tidak dijawab)';
+    const kunci = GS.currentSoal?.k || '';
+    return `<div class="ej" style="margin-bottom:9px;">
+      <div style="font-weight:800;font-size:.85rem;margin-bottom:6px;">
+        <span style="background:${g.color};width:10px;height:10px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:5px;"></span>${g.name}
+      </div>
+      <div class="ab">${ans}</div>
+      <div class="kj">🔑 Kunci: ${kunci}</div>
+      <div class="jbtns">
+        <button class="btn bg bsm" onclick="nilaiEssay(${gi},true)">✅ Benar +6</button>
+        <button class="btn br bsm" onclick="nilaiEssay(${gi},false)">❌ Salah −2</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-  cs.status = 'done';
-  cs.result = benar;
-  g.cursor++;
-  gameState.answeredCount = (gameState.answeredCount || 0) + 1;
-
-  // Check win
-  if (g.pos >= TOTAL_CELLS) {
-    g.pos = TOTAL_CELLS;
-    gameState.winner = cs.groupIdx;
+function nilaiEssay(gi, benar) {
+  if (!GS.answers) GS.answers = {};
+  GS.answers[gi] = { answer: GS.answers[gi]?.answer||'', correct: benar, time: Date.now(), status: benar?'correct':'wrong' };
+  GS.essayPending = (GS.essayPending||[]).filter(x=>x!==gi);
+  if (GS.essayPending.length === 0) {
+    GS.currentSoal.status = 'done';
+    processResults();
   }
+  push();
+  updateGuruPanel();
+}
 
-  pushState();
+function processResults() {
+  clearInterval(timerIv);
+  guruTimerRunning = false;
+  const cs = GS.currentSoal;
+  if (!cs) return;
+
+  // For PG: auto-grade remaining non-answers as wrong
+  const map = cs.groupSoalIdxMap || {};
+  if (!GS.answers) GS.answers = {};
+  Object.keys(map).forEach(gi=>{
+    const gii = +gi;
+    if (map[gi]!==null && map[gi]!==undefined && !GS.answers[gii]) {
+      GS.answers[gii] = { answer: null, correct: false, time: Date.now(), status: 'timeout' };
+    }
+  });
+
+  // Find fastest correct (for bonus)
+  const correctOnes = Object.entries(GS.answers)
+    .filter(([,v])=>v.correct)
+    .sort(([,a],[,b])=>a.time-b.time);
+  const fastestGi = correctOnes.length > 0 ? +correctOnes[0][0] : null;
+
+  // Apply moves
+  Object.entries(GS.answers).forEach(([gi,a])=>{
+    const gii = +gi;
+    const g = GS.groups[gii];
+    if (!g) return;
+    const bobot = cs.type==='essay' ? BOBOT_ESSAY : BOBOT_PG;
+    let delta = a.correct ? bobot : -DENDA;
+    if (a.correct && gii===fastestGi && correctOnes.length>1) delta += BONUS_CEPAT;
+    let newPos = Math.max(1, Math.min(TOTAL_CELLS, g.pos + delta));
+    g.pos = newPos;
+    if (SNAKES[newPos])  { g.pos=SNAKES[newPos]; }
+    else if (LADDERS[newPos]) { g.pos=LADDERS[newPos]; }
+    if (g.pos >= TOTAL_CELLS) { g.pos=TOTAL_CELLS; GS.winner=gii; }
+    // Advance group cursor
+    g.cursor = (g.cursor||0) + 1;
+  });
+
+  GS.answeredTotal = (GS.answeredTotal||0) + 1;
+  GS.currentSoal.status = 'done';
+  GS.results = { answers: {...GS.answers}, fastestGi };
+  push();
   renderBoard();
+  updateGuruPanel();
+}
 
-  if (special) {
-    setTimeout(() => {
-      const msg = special.type === 'snake'
-        ? `🐍 Ular! ${g.name} turun ke kotak ${special.to}`
-        : `🪜 Tangga! ${g.name} naik ke kotak ${special.to}`;
-      showToast(msg, special.type === 'snake' ? 'snake' : 'ladder');
-    }, 400);
-  }
+function showResults() {
+  const ej = document.getElementById('essayJudgeArea');
+  ej.style.display = 'none';
+  // Show result summary in soal panel
+  const cs = GS.currentSoal;
+  const res = GS.results;
+  if (!cs || !res) return;
+  // Update ans status to correct/wrong
+  const grid = document.getElementById('ansStatusGrid');
+  grid.innerHTML = GS.groups.map((g,i)=>{
+    const a = res.answers?.[i];
+    if (!a) return `<div class="ans-status-item waiting"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}<br><small>—</small></div>`;
+    const cls = a.correct ? 'correct' : 'wrong';
+    const lbl = a.correct ? (i===res.fastestGi ? '⚡ Benar+Bonus' : '✅ Benar') : (a.status==='timeout'?'⏰ Timeout':'❌ Salah');
+    return `<div class="ans-status-item ${cls}"><span class="dot" style="background:${g.color};border-radius:50%;"></span>${g.name}<br><small>${lbl}</small></div>`;
+  }).join('');
+  document.getElementById('ansCountTxt').textContent = 'Semua selesai!';
+}
 
-  updateGuruSidebar();
+// ═══════════════════════════
+//  LEMPAR SOAL
+// ═══════════════════════════
+function lemparSoal() {
+  clearInterval(timerIv);
+  guruTimerRunning = false;
 
-  if (gameState.winner !== null && gameState.winner !== undefined) {
-    setTimeout(showWinner, 1200);
-  }
+  // Find which soal to assign to each group based on their cursor
+  // All groups are on the same "round" — soalIdx matches group cursor
+  const round = GS.soalIdx;
+  const groupSoalIdxMap = {};
+  let anyHasSoal = false;
+
+  GS.groups.forEach((g,i)=>{
+    if (g.cursor < SOAL_PER_GROUP) {
+      groupSoalIdxMap[i] = g.cursor; // this group's current soal in their list
+      anyHasSoal = true;
+    } else {
+      groupSoalIdxMap[i] = null; // group done
+    }
+  });
+
+  if (!anyHasSoal) { showWinner(); return; }
+
+  // Pick ONE soal type per round: alternate PG and Essay, or based on the majority
+  // Use the first group's current soal type as reference
+  let firstActive = GS.groups.findIndex(g=>g.cursor < SOAL_PER_GROUP);
+  const ref = GS.groups[firstActive].soalList[GS.groups[firstActive].cursor];
+  const type = ref.type;
+  const timerMax = type==='pg' ? TIMER_PG : TIMER_ESSAY;
+
+  // Build q/choices from the reference group's soal (all groups get same soal per round? No: each group has their own soal!)
+  // Since each group has THEIR OWN soal, we show the soal to each group individually
+  // The "current soal" shown to guru is a summary; each group's HP shows their own soal
+  // For simplicity: show reference soal to guru; murid gets their own from soalList
+
+  // Actually each group can have different soal — we store all in currentSoal
+  const groupSoals = {};
+  GS.groups.forEach((g,i)=>{
+    if (groupSoalIdxMap[i]!==null && groupSoalIdxMap[i]!==undefined) {
+      const s = g.soalList[g.cursor];
+      const bank = s.type==='pg' ? BANK_PG : BANK_ESSAY;
+      groupSoals[i] = { type:s.type, soalIdx:s.idx, q:bank[s.idx].q, ch:bank[s.idx].ch||null, ans:bank[s.idx].ans!==undefined?bank[s.idx].ans:null, k:bank[s.idx].k };
+    }
+  });
+
+  GS.currentSoal = {
+    type, // type of ref group
+    q: groupSoals[firstActive]?.q || '—',
+    k: groupSoals[firstActive]?.k || '—',
+    timerMax,
+    timerStart: Date.now(),
+    status: 'active',
+    groupSoalIdxMap,
+    groupSoals, // per-group soal data
+  };
+  GS.answers = {};
+  GS.essayPending = [];
+  GS.results = null;
+  GS.soalIdx = round + 1;
+  push();
+  updateGuruPanel();
+
+  // After timerMax, auto-process
+  clearInterval(timerIv);
+  guruTimerRunning = false;
 }
 
 function lanjutSoal() {
-  gameState.currentSoal = null;
-  nextTurn();
-}
-
-function nextTurn() {
-  const n = gameState.groups.length;
-  let next = (gameState.currentTurn + 1) % n;
-  let tries = 0;
-  while (gameState.groups[next].cursor >= SOAL_PER_GROUP && tries < n) {
-    next = (next + 1) % n;
-    tries++;
-  }
-  gameState.currentTurn = next;
-  pushState();
-  updateGuruSidebar();
+  GS.currentSoal = null;
+  GS.answers = {};
+  GS.essayPending = [];
+  GS.results = null;
+  push();
+  updateGuruPanel();
   renderBoard();
-  loadNextSoal();
+  // Check winner
+  if (GS.winner !== null && GS.winner !== undefined) { showWinner(); return; }
+  const allDone = GS.groups.every(g=>g.cursor>=SOAL_PER_GROUP);
+  if (allDone) showWinner();
 }
 
-function confirmReset() {
+function konfirmReset() {
   if (confirm('Reset game? Semua data akan hilang.')) {
-    clearInterval(timerInterval);
-    gameState = { started:false, groups:[], currentTurn:0, currentSoal:null, winner:null, totalSoal:0, answeredCount:0 };
+    clearInterval(timerIv); clearInterval(muridTimerIv);
+    guruTimerRunning=false;
+    GS = {started:false,groups:[],soalIdx:0,currentSoal:null,answers:{},essayPending:[],results:null,winner:null,totalSoal:0,answeredTotal:0};
     if (useFirebase && gameRef) gameRef.set(null);
-    showScreen('landing');
+    ss('landing');
   }
 }
 
-// ════════════════════════════════════════════════════════
-//  MURID VIEW
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
+//  MURID
+// ═══════════════════════════
 function renderGroupPick() {
-  const grid = document.getElementById('groupPickGrid');
-  const groups = gameState.groups.length ? gameState.groups
-    : Array.from({length:5}, (_,i) => ({name:GROUP_NAMES_DEFAULT[i], color:GROUP_COLORS[i]}));
-
-  grid.innerHTML = groups.map((g, i) => `
-    <div class="group-pick-btn" onclick="pilihKelompok(${i})" style="border-color:${g.color}40;">
+  const grid = document.getElementById('gpickGrid');
+  const groups = GS.groups.length ? GS.groups : Array.from({length:5},(_,i)=>({name:GROUP_DEF[i],color:GROUP_COLORS[i]}));
+  grid.innerHTML = groups.map((g,i)=>`
+    <div class="gpick-btn" onclick="pilihKelompok(${i})" style="border-color:${g.color}55;">
       <div class="dot3" style="background:${g.color}"></div>
-      <div class="gname">${g.name}</div>
-    </div>
-  `).join('');
+      <div class="gn">${g.name}</div>
+    </div>`).join('');
 }
 
 function pilihKelompok(idx) {
-  myGroupIdx = idx;
-  const g = gameState.groups[idx] || { name: GROUP_NAMES_DEFAULT[idx] };
-  document.getElementById('muridTopTitle').textContent = `📱 ${g.name}`;
-  showScreen('muridGame');
+  myGroup = idx;
+  const g = GS.groups[idx]||{name:GROUP_DEF[idx],pos:1};
+  document.getElementById('mTopTitle').textContent = `📱 ${g.name}`;
+  document.getElementById('mPosTag').textContent = `Kotak ${g.pos}`;
+  ss('muridGame');
   updateMuridView();
+  // Listen for changes
+  if (useFirebase && gameRef) {
+    gameRef.on('value', snap=>{
+      const d = snap.val();
+      if (!d) return;
+      GS = d;
+      if (document.getElementById('muridGame').classList.contains('on')) updateMuridView();
+      if (GS.winner!==null&&GS.winner!==undefined&&!document.getElementById('winnerScreen').classList.contains('on')) showWinner();
+    });
+  }
 }
 
 function updateMuridView() {
-  if (myGroupIdx === null) return;
-  const g = gameState.groups[myGroupIdx];
+  if (myGroup===null) return;
+  const g = GS.groups[myGroup];
   if (!g) return;
+  document.getElementById('mPosTag').textContent = `Kotak ${g.pos}`;
+  document.getElementById('mTopTitle').textContent = `📱 ${g.name}`;
 
-  document.getElementById('muridPos').textContent = `Kotak ${g.pos}`;
-  document.getElementById('muridTopTitle').textContent = `📱 ${g.name}`;
+  const waitEl = document.getElementById('mWait');
+  const soalEl = document.getElementById('mSoalCard');
+  const subEl  = document.getElementById('mSubmitted');
+  const resEl  = document.getElementById('mResult');
 
-  const cs = gameState.currentSoal;
-  const waitDiv = document.getElementById('muridWaitTurn');
-  const soalCard = document.getElementById('muridSoalCard');
-  const submittedDiv = document.getElementById('muridSubmitted');
-  const resultDiv = document.getElementById('muridResult');
+  // Hide all
+  [waitEl,soalEl,subEl,resEl].forEach(el=>el.style.display='none');
 
-  // Hide all first
-  waitDiv.style.display = 'none';
-  soalCard.style.display = 'none';
-  submittedDiv.style.display = 'none';
-  resultDiv.style.display = 'none';
+  const cs = GS.currentSoal;
 
-  if (!gameState.started) {
-    waitDiv.style.display = 'block';
-    document.getElementById('muridWaitMsg').textContent = 'Menunggu guru memulai game...';
-    return;
+  if (!GS.started) {
+    waitEl.style.display='flex'; document.getElementById('mWaitMsg').textContent='Menunggu guru memulai game...'; return;
   }
 
   if (!cs) {
-    // Between questions
-    if (gameState.currentTurn === myGroupIdx) {
-      waitDiv.style.display = 'block';
-      document.getElementById('muridWaitMsg').textContent = 'Giliran kamu! Soal sedang disiapkan...';
-    } else {
-      waitDiv.style.display = 'block';
-      const other = gameState.groups[gameState.currentTurn];
-      document.getElementById('muridWaitMsg').textContent = `Giliran ${other?.name || '...'} menjawab`;
-    }
+    waitEl.style.display='flex';
+    const allDone = GS.groups.every(gg=>gg.cursor>=SOAL_PER_GROUP);
+    document.getElementById('mWaitMsg').textContent = allDone ? 'Game selesai!' : 'Menunggu guru melempar soal berikutnya...';
     return;
   }
 
-  // There's an active soal
-  if (cs.groupIdx !== myGroupIdx) {
-    // Not my turn
-    waitDiv.style.display = 'block';
-    const other = gameState.groups[cs.groupIdx];
-    document.getElementById('muridWaitMsg').textContent = `Giliran ${other?.name || '...'} menjawab`;
+  // Check if this group has a soal in this round
+  const myMap = cs.groupSoalIdxMap?.[myGroup];
+  if (myMap === null || myMap === undefined) {
+    waitEl.style.display='flex';
+    document.getElementById('mWaitMsg').textContent='Kelompokmu sudah selesai semua soal! 🎉';
     return;
   }
 
-  // MY TURN!
+  const myAns = GS.answers?.[myGroup];
+  const mySoal = cs.groupSoals?.[myGroup];
+
   if (cs.status === 'done') {
     // Show result
-    resultDiv.style.display = 'flex';
-    document.getElementById('mResultIcon').textContent = cs.result ? '✅' : '❌';
-    document.getElementById('mResultTitle').textContent = cs.result ? 'Benar!' : 'Salah!';
-    document.getElementById('mResultTitle').style.color = cs.result ? 'var(--green)' : 'var(--red)';
-    const bobot = cs.type === 'essay' ? BOBOT_ESSAY : BOBOT_PG;
-    document.getElementById('mResultSub').textContent = cs.result ? `+${bobot} kotak naik!` : `−${DENDA} kotak turun`;
+    resEl.style.display='flex';
+    const correct = myAns?.correct;
+    const bobot = mySoal?.type==='essay' ? BOBOT_ESSAY : BOBOT_PG;
+    document.getElementById('mRIcon').textContent = correct ? '✅' : '❌';
+    document.getElementById('mRTitle').textContent = correct ? 'Benar!' : 'Salah!';
+    document.getElementById('mRTitle').style.color = correct ? 'var(--g)' : 'var(--r)';
+    document.getElementById('mRSub').textContent = correct ? `+${bobot} kotak naik! 🚀` : `−${DENDA} kotak turun 😓`;
+    document.getElementById('mNewPos').textContent = `📍 Kotak ${g.pos}`;
+    clearInterval(muridTimerIv);
     return;
   }
 
-  if (cs.status === 'essay_judge' || (cs.type === 'essay' && cs.muridAnswer)) {
-    submittedDiv.style.display = 'block';
-    document.getElementById('muridSubmittedMsg').textContent = cs.type === 'essay'
-      ? 'Jawaban terkirim! Menunggu penilaian guru...'
-      : 'Jawaban terkirim!';
+  if (cs.status === 'essay_judge') {
+    if (myAns) { subEl.style.display='block'; document.getElementById('mSubMsg').textContent='Jawaban terkirim! Menunggu penilaian guru...'; }
+    else { soalEl.style.display='block'; renderMuridSoal(mySoal, cs); }
     return;
   }
 
-  if (cs.status === 'waiting') {
-    // Show the question
-    showMuridSoal(cs);
+  if (myAns) {
+    subEl.style.display='block';
+    document.getElementById('mSubMsg').textContent='Jawaban terkirim! Menunggu kelompok lain...';
+    clearInterval(muridTimerIv);
+    return;
+  }
+
+  if (cs.status === 'active' && mySoal) {
+    soalEl.style.display='block';
+    renderMuridSoal(mySoal, cs);
   }
 }
 
-let muridTimerInterval = null;
-
-function showMuridSoal(cs) {
-  const soalCard = document.getElementById('muridSoalCard');
-  soalCard.style.display = 'block';
-
-  // Type pill
+function renderMuridSoal(mySoal, cs) {
+  if (!mySoal) return;
   const pill = document.getElementById('mTypePill');
-  pill.textContent = cs.type === 'pg' ? 'PG' : 'Essay';
-  pill.className = 'type-pill ' + cs.type;
-
-  const bobot = cs.type === 'essay' ? BOBOT_ESSAY : BOBOT_PG;
-  document.getElementById('mBobotTag').textContent = `+${bobot} kotak`;
-
-  const g = gameState.groups[myGroupIdx];
+  pill.textContent = mySoal.type==='pg'?'PG':'Essay';
+  pill.className = 'type-pill '+(mySoal.type==='pg'?'tp-pg':'tp-es');
+  const bobot = mySoal.type==='essay'?BOBOT_ESSAY:BOBOT_PG;
+  document.getElementById('mBobot').textContent = `+${bobot} kotak`;
+  document.getElementById('mQTxt').textContent = mySoal.q;
+  const g = GS.groups[myGroup];
   document.getElementById('mQNum').textContent = `Soal ${(g?.cursor||0)+1}/10`;
-  document.getElementById('mQText').textContent = cs.q;
 
-  const choicesDiv = document.getElementById('mChoices');
-  const essayDiv = document.getElementById('mEssayDiv');
+  const choicesEl = document.getElementById('mChoices');
+  const essayEl = document.getElementById('mEssayDiv');
 
-  if (cs.type === 'pg') {
-    essayDiv.style.display = 'none';
-    choicesDiv.style.display = 'flex';
-    choicesDiv.innerHTML = cs.choices.map((c, i) => `
-      <button class="choice-opt" onclick="pilihJawabanMurid(${i})" id="mopt_${i}">
-        <span class="choice-key">${'ABCD'[i]}</span>
-        ${c}
-      </button>
-    `).join('');
+  if (mySoal.type==='pg') {
+    essayEl.style.display='none'; choicesEl.style.display='flex';
+    choicesEl.innerHTML = (mySoal.ch||[]).map((c,i)=>`
+      <button class="copt" onclick="pilihJawaban(${i})" id="co_${i}">
+        <span class="ckey">${'ABCD'[i]}</span>${c}
+      </button>`).join('');
   } else {
-    choicesDiv.style.display = 'none';
-    essayDiv.style.display = 'block';
-    document.getElementById('mEssayInput').value = '';
-    document.getElementById('btnKirimEssay').disabled = false;
+    choicesEl.style.display='none'; essayEl.style.display='block';
+    document.getElementById('mEssayInput').value='';
+    document.getElementById('btnKirimEssay').disabled=false;
   }
 
-  // Timer
-  clearInterval(muridTimerInterval);
-  const maxTime = cs.timerMax || (cs.type === 'pg' ? TIMER_PG : TIMER_ESSAY);
-  muridTimerInterval = setInterval(() => {
-    const elapsed = (Date.now() - cs.timerStarted) / 1000;
-    const rem = Math.max(0, maxTime - elapsed);
-    const pct = (rem / maxTime) * 100;
-    const fill = document.getElementById('mTimerFill');
-    if (fill) {
-      fill.style.width = pct + '%';
-      fill.className = 'timer-bar-fill' + (pct < 25 ? ' danger' : '');
-    }
-    const numEl = document.getElementById('mTimerNum');
-    if (numEl) numEl.textContent = Math.ceil(rem) + 's';
-    if (rem <= 0) {
-      clearInterval(muridTimerInterval);
-    }
-  }, 200);
+  // Start murid timer
+  clearInterval(muridTimerIv);
+  muridTimerIv = setInterval(()=>{
+    const elapsed=(Date.now()-cs.timerStart)/1000;
+    const rem=Math.max(0,cs.timerMax-elapsed);
+    const pct=(rem/cs.timerMax)*100;
+    const fill=document.getElementById('mTimerFill');
+    const num=document.getElementById('mTimerNum');
+    if(fill){fill.style.width=pct+'%';fill.className='tbar-fill'+(pct<25?' danger':'');}
+    if(num) num.textContent=Math.ceil(rem)+'s';
+    if(rem<=0){clearInterval(muridTimerIv);handleTimeout();}
+  },200);
 }
 
-let selectedMuridChoice = -1;
-
-function pilihJawabanMurid(idx) {
-  selectedMuridChoice = idx;
-  document.querySelectorAll('.choice-opt').forEach((b, i) => {
-    b.className = 'choice-opt' + (i === idx ? ' selected' : '');
-  });
-  // Auto submit after short delay
-  setTimeout(() => submitPGAnswer(idx), 500);
-}
-
-function submitPGAnswer(idx) {
-  clearInterval(muridTimerInterval);
-  const cs = gameState.currentSoal;
-  if (!cs || cs.status !== 'waiting') return;
-
-  const benar = idx === cs.ans;
-
-  // Show correct/wrong
-  document.querySelectorAll('.choice-opt').forEach((b, i) => {
-    b.disabled = true;
-    if (i === cs.ans) b.className = 'choice-opt correct';
-    else if (i === idx) b.className = 'choice-opt wrong';
-  });
-
-  // For local mode: process immediately
-  // For Firebase mode: update state and guru processes
-  if (!useFirebase) {
-    setTimeout(() => {
-      processAnswer(benar, false);
-      updateMuridView();
-    }, 700);
-  } else {
-    // Send answer to Firebase
-    gameRef.child('currentSoal').update({
-      muridAnswer: String(idx),
-      status: 'done',
-      result: benar,
-    });
-    setTimeout(() => {
-      processAnswer(benar, false);
-    }, 700);
+function handleTimeout() {
+  const cs = GS.currentSoal;
+  if (!cs||cs.status!=='active') return;
+  const myAns = GS.answers?.[myGroup];
+  if (!myAns) {
+    submitAnswer(null, false, true);
   }
+}
+
+let muridAnswering = false;
+function pilihJawaban(idx) {
+  if (muridAnswering) return;
+  muridAnswering = true;
+  clearInterval(muridTimerIv);
+  const cs = GS.currentSoal;
+  const mySoal = cs?.groupSoals?.[myGroup];
+  if (!mySoal) return;
+
+  document.querySelectorAll('.copt').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===mySoal.ans) b.className='copt cor';
+    else if(i===idx) b.className='copt wrg';
+  });
+
+  const correct = idx === mySoal.ans;
+  setTimeout(()=>{
+    submitAnswer(String(idx), correct, false);
+    muridAnswering = false;
+  }, 600);
 }
 
 function kirimEssay() {
-  const ans = document.getElementById('mEssayInput').value.trim();
-  if (!ans) {
-    document.getElementById('mEssayInput').style.borderColor = 'var(--red)';
-    setTimeout(() => document.getElementById('mEssayInput').style.borderColor = '', 1000);
+  const val = document.getElementById('mEssayInput').value.trim();
+  if (!val) {
+    document.getElementById('mEssayInput').style.borderColor='var(--r)';
+    setTimeout(()=>document.getElementById('mEssayInput').style.borderColor='',900);
     return;
   }
-  clearInterval(muridTimerInterval);
-  document.getElementById('btnKirimEssay').disabled = true;
-
-  if (!useFirebase) {
-    // Local: show to guru panel directly
-    gameState.currentSoal.muridAnswer = ans;
-    gameState.currentSoal.status = 'essay_judge';
-    updateGuruSidebar();
-    updateMuridView();
-  } else {
-    gameRef.child('currentSoal').update({
-      muridAnswer: ans,
-      status: 'essay_judge',
-    });
-    updateMuridView();
-  }
+  clearInterval(muridTimerIv);
+  document.getElementById('btnKirimEssay').disabled=true;
+  submitAnswer(val, null, false); // null = needs guru judgment
 }
 
-// ════════════════════════════════════════════════════════
+function submitAnswer(answer, correct, timeout) {
+  const cs = GS.currentSoal;
+  if (!cs) return;
+  const mySoal = cs.groupSoals?.[myGroup];
+  const isEssay = mySoal?.type==='essay';
+
+  // Local update
+  if (!GS.answers) GS.answers = {};
+  const status = timeout ? 'timeout' : (isEssay ? 'answered' : (correct?'correct':'wrong'));
+  GS.answers[myGroup] = { answer: answer||'', correct: isEssay?null:correct, time: Date.now(), status };
+
+  // If essay, add to pending
+  if (isEssay && !timeout) {
+    if (!GS.essayPending) GS.essayPending=[];
+    if (!GS.essayPending.includes(myGroup)) GS.essayPending.push(myGroup);
+    // Check if all non-essay groups answered → set status to essay_judge
+    const map = cs.groupSoalIdxMap||{};
+    const totalActive = Object.values(map).filter(v=>v!==null&&v!==undefined).length;
+    const answered = Object.keys(GS.answers).length;
+    if (answered>=totalActive) {
+      GS.currentSoal.status = 'essay_judge';
+    }
+  } else if (!isEssay) {
+    // Check if all answered
+    const map = cs.groupSoalIdxMap||{};
+    const totalActive = Object.values(map).filter(v=>v!==null&&v!==undefined).length;
+    const answered = Object.keys(GS.answers).length;
+    if (answered>=totalActive) {
+      // Check if any essay pending
+      if ((GS.essayPending||[]).length>0) GS.currentSoal.status='essay_judge';
+      else { GS.currentSoal.status='done'; processResults(); }
+    }
+  }
+
+  push();
+  updateMuridView();
+}
+
+// ═══════════════════════════
 //  WINNER
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 function showWinner() {
-  clearInterval(timerInterval);
-  clearInterval(muridTimerInterval);
-  const wIdx = gameState.winner;
-  const w = gameState.groups[wIdx !== null && wIdx !== undefined ? wIdx : 0];
-
-  document.getElementById('winnerName').textContent = (w?.name || '—') + ' Menang!';
-  document.getElementById('winnerSub').textContent = 'Hasil akhir permainan:';
-
-  const sorted = [...gameState.groups].sort((a,b) => b.pos - a.pos);
-  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-  document.getElementById('finalTable').innerHTML = sorted.map((g,i) => `
-    <div class="final-row ${i===0?'first':''}">
-      <div class="medal">${medals[i]}</div>
-      <div class="sdot" style="background:${g.color};width:13px;height:13px;border-radius:50%;flex-shrink:0;"></div>
+  clearInterval(timerIv); clearInterval(muridTimerIv);
+  guruTimerRunning=false;
+  const wi = GS.winner;
+  const w = wi!==null&&wi!==undefined ? GS.groups[wi] : [...GS.groups].sort((a,b)=>b.pos-a.pos)[0];
+  document.getElementById('wName').textContent = (w?.name||'—')+' Menang!';
+  document.getElementById('wSub').textContent = 'Hasil akhir permainan:';
+  const sorted=[...GS.groups].sort((a,b)=>b.pos-a.pos);
+  const medals=['🥇','🥈','🥉','4️⃣','5️⃣'];
+  document.getElementById('finalTable').innerHTML = sorted.map((g,i)=>`
+    <div class="fr ${i===0?'first':''}">
+      <div class="med">${medals[i]}</div>
+      <div class="sd" style="background:${g.color};width:12px;height:12px;border-radius:50%;flex-shrink:0;"></div>
       <div class="fn">${g.name}</div>
       <div class="fp">Kotak ${g.pos}</div>
-    </div>
-  `).join('');
-
-  showScreen('winnerScreen');
+    </div>`).join('');
+  ss('winnerScreen');
 }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 //  TOAST
-// ════════════════════════════════════════════════════════
-let toastTimer = null;
-function showToast(msg, type='info') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = type + ' show';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+// ═══════════════════════════
+let toastTm=null;
+function toast(msg,type='info'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=type+' show';
+  clearTimeout(toastTm); toastTm=setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 //  UTILS
-// ════════════════════════════════════════════════════════
-function shuffle(arr) {
-  for (let i = arr.length-1; i > 0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]] = [arr[j],arr[i]];
-  }
-  return arr;
-}
+// ═══════════════════════════
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════
 //  INIT
-// ════════════════════════════════════════════════════════
-window.addEventListener('load', () => {
+// ═══════════════════════════
+window.addEventListener('load', ()=>{
   initFirebase();
-
-  // Handle Enter on PIN
-  document.getElementById('guruPinInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkGuruPin();
-  });
-
-  // If Firebase, listen for game state changes
-  if (useFirebase) {
-    // Already set up in setupFirebaseListeners
-  }
+  document.getElementById('pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin();});
 });
-
-window.addEventListener('resize', () => {
-  if (document.getElementById('guruGame').classList.contains('on')) {
-    initCanvas();
-    renderBoard();
-  }
+window.addEventListener('resize',()=>{
+  if(document.getElementById('guruGame').classList.contains('on')){initCanvas();renderBoard();}
 });
 </script>
 </body>
